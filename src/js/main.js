@@ -3,9 +3,6 @@ import '../css/base.css';
 import '../css/components.css';
 import '../css/sections.css';
 
-import { init as initLoader } from './modules/loader.js';
-// ... rest of file unchanged
-
 import { init as initLoader }          from './modules/loader.js';
 import { init as initCursor }          from './modules/cursor.js';
 import { init as initPseudoBg }        from './modules/pseudo-bg.js';

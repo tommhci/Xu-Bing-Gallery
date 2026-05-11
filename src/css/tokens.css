@@ -1,0 +1,36 @@
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS v2.7.1
+   ═══════════════════════════════════════════════════ */
+:root {
+  --ink:             #07070a;
+  --deep:            #0d0c10;
+  --surface:         #13121a;
+  --muted:           #1e1c28;
+  --paper:           #f0e6d3;
+  --paper-dim:       #c8bba8;
+  --paper-ghost:     rgba(240,230,211,0.07);
+  --paper-ghost2:    rgba(240,230,211,0.04);
+
+  --vermillion:      #bf2929;
+  --vermillion-soft: rgba(191,41,41,0.18);
+  --vermillion-glow: rgba(191,41,41,0.35);
+  --gold:            #c9a356;
+  --gold-soft:       rgba(201,163,86,0.15);
+  --teal:            #3a8c8c;
+  --teal-soft:       rgba(58,140,140,0.15);
+  --violet:          #7a5cbf;
+  --violet-soft:     rgba(122,92,191,0.15);
+
+  /* Room accent system */
+  --room-1: #bf2929;
+  --room-2: #c9a356;
+  --room-3: #3a8c8c;
+  --room-4: #7a5cbf;
+
+  --border:        rgba(240,230,211,0.09);
+  --border-strong: rgba(240,230,211,0.20);
+
+  --serif: 'EB Garamond', Georgia, serif;
+  --cjk:   'Noto Serif SC', 'EB Garamond', serif;
+  --mono:  'Space Mono', monospace;
+}

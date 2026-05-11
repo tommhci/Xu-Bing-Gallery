@@ -49,6 +49,18 @@
   width: 0%; transition: width 0.1s;
 }
 
+/* Contextual Back Link for D5 H7 Improvement */
+.context-back-link-wrap {
+  display: flex;
+  align-items: center;
+  margin: 0 0 1.5rem 0;
+}
+
+.context-back-link-wrap .back-btn {
+  border-color: var(--border-strong);
+  background: var(--paper-ghost2);
+}
+
 /* ── Nav ── */
 nav#nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;

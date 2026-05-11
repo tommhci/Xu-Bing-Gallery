@@ -17,6 +17,7 @@ import { init as initSquareWord }      from './modules/square-word.js';
 import { init as initGlyphQuiz }       from './modules/glyph-quiz.js';
 import { init as initTheoryReveal }    from './modules/theory-reveal.js';
 import { init as initArGrid }          from './modules/ar-grid.js';
+import { initContextReturn }           from './modules/context-return.js';
 
 initLoader();
 initCursor();
@@ -32,3 +33,11 @@ initSquareWord();
 initGlyphQuiz();
 initTheoryReveal();
 initArGrid();
+
+// 初始化序列
+document.addEventListener('DOMContentLoaded', () => {
+  initNavigation(); // 现有的
+  // ... 其他现有的 init ...
+  
+  initContextReturn(); // <--- 新增这行，挂载上下文返回逻辑
+});

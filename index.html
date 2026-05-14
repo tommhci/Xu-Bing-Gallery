@@ -1,34 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Xu Bing: Epistemic Gallery</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+SC:wght@300;400;500&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xu Bing: Epistemic Gallery</title>
 
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+SC:wght@300;400;500&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Project CSS -->
+  <link rel="stylesheet" href="/src/css/tokens.css">
+  <link rel="stylesheet" href="/src/css/base.css">
+  <link rel="stylesheet" href="/src/css/components.css">
+  <link rel="stylesheet" href="/src/css/sections.css">
 </head>
 <body>
 
 <!-- Custom cursor -->
 <div class="cursor-dot" id="cursor" aria-hidden="true"></div>
+
 <!-- Scroll progress -->
 <div id="progress-bar" role="progressbar" aria-label="Page reading progress"></div>
 
 <!-- ── Minimap ── -->
 <div id="minimap" role="navigation" aria-label="Section navigation">
-  <div class="mm-dot active" data-target="hero"            data-label="Hero"              tabindex="0" role="button" aria-label="Go to Hero"></div>
-  <div class="mm-dot"        data-target="artist"          data-label="Artist"            tabindex="0" role="button" aria-label="Go to Artist"></div>
-  <div class="mm-dot"        data-target="foyer"           data-label="Foyer"             tabindex="0" role="button" aria-label="Go to Foyer"></div>
-  <div class="mm-dot"        data-target="room-sky"        data-label="Room 01"           tabindex="0" role="button" aria-label="Go to Room 01"></div>
-  <div class="mm-dot"        data-target="room-english"    data-label="Room 02"           tabindex="0" role="button" aria-label="Go to Room 02"></div>
-  <div class="mm-dot"        data-target="room-square"     data-label="Room 03"           tabindex="0" role="button" aria-label="Go to Room 03"></div>
-  <div class="mm-dot"        data-target="glyph-tool"      data-label="Glyph Engine"      tabindex="0" role="button" aria-label="Go to Glyph Engine"></div>
-  <div class="mm-dot"        data-target="timeline"        data-label="Timeline"          tabindex="0" role="button" aria-label="Go to Timeline"></div>
-  <div class="mm-dot"        data-target="theory"          data-label="Theory"            tabindex="0" role="button" aria-label="Go to Theory"></div>
-  <div class="mm-dot"        data-target="ar-panel"        data-label="AR"                tabindex="0" role="button" aria-label="Go to AR Panel"></div>
-  <div class="mm-dot"        data-target="provenance"      data-label="Provenance"        tabindex="0" role="button" aria-label="Go to Provenance"></div>
+  <div class="mm-dot active" data-target="hero"         data-label="Hero"         tabindex="0" role="button" aria-label="Go to Hero"></div>
+  <div class="mm-dot"        data-target="artist"       data-label="Artist"       tabindex="0" role="button" aria-label="Go to Artist"></div>
+  <div class="mm-dot"        data-target="foyer"        data-label="Foyer"        tabindex="0" role="button" aria-label="Go to Foyer"></div>
+  <div class="mm-dot"        data-target="room-sky"     data-label="Room 01"      tabindex="0" role="button" aria-label="Go to Room 01"></div>
+  <div class="mm-dot"        data-target="room-english" data-label="Room 02"      tabindex="0" role="button" aria-label="Go to Room 02"></div>
+  <div class="mm-dot"        data-target="room-square"  data-label="Room 03"      tabindex="0" role="button" aria-label="Go to Room 03"></div>
+  <div class="mm-dot"        data-target="glyph-tool"   data-label="Glyph Engine" tabindex="0" role="button" aria-label="Go to Glyph Engine"></div>
+  <div class="mm-dot"        data-target="timeline"     data-label="Timeline"     tabindex="0" role="button" aria-label="Go to Timeline"></div>
+  <div class="mm-dot"        data-target="theory"       data-label="Theory"       tabindex="0" role="button" aria-label="Go to Theory"></div>
+  <div class="mm-dot"        data-target="ar-panel"     data-label="AR"           tabindex="0" role="button" aria-label="Go to AR Panel"></div>
+  <div class="mm-dot"        data-target="provenance"   data-label="Provenance"   tabindex="0" role="button" aria-label="Go to Provenance"></div>
 </div>
 
 <!-- ── Loader ── -->
@@ -68,14 +76,19 @@
       <span>Xu Bing</span>
     </h1>
     <p class="hero-subtitle">
-      An interface that enacts reading failure — not explains it. Where the collapse of legibility is not a limitation to be resolved, but the primary content delivered to every visitor.
+      An interface that enacts reading failure — not one that merely explains it. The collapse of legibility here is not a limitation to be resolved, but the primary content delivered to every visitor.
     </p>
     <div class="hero-ctas">
       <div class="entry-rupture-wrap">
         <a href="#foyer" class="entry-btn-pseudo" id="entry-btn"
            aria-label="Enter Gallery"
            aria-describedby="entry-tooltip">
-          <span aria-hidden="true">囗</span>
+        <svg viewBox="0 0 100 100" width="1.2em" height="1.2em" fill="none" stroke="currentColor">
+          <rect x="11" y="11" width="78" height="78" stroke-width="8"/>
+          <line x1="50" y1="30" x2="25" y2="75" stroke-width="8" stroke-linecap="round"/> 
+          <line x1="50" y1="30" x2="75" y2="75" stroke-width="8" stroke-linecap="round"/> 
+        </svg>
+                  
         </a>
         <div class="entry-tooltip" id="entry-tooltip" role="tooltip">
           [ reading: activation → suspension ]
@@ -108,7 +121,7 @@
     <h2>Master of the Unreadable Sign</h2>
     <div class="authorship-tag">Curatorial Note</div>
     <p>Xu Bing (b. 1955, Chongqing) occupies a singular position in contemporary art: he constructs systems of meaning that activate every mechanism of linguistic recognition — only to suspend resolution at the moment of comprehension.</p>
-    <p>Trained during the Cultural Revolution, exiled to rural reeducation, and eventually relocated to New York, Xu Bing's biography is itself a semiotic rupture — a life across incommensurable sign systems. His work does not illustrate this; it <em>enacts</em> it.</p>
+    <p>Trained during the Cultural Revolution, sent to the countryside for reeducation, and eventually relocated to New York, Xu Bing's biography is itself a semiotic rupture — a life across incommensurable sign systems. His work does not illustrate this; it <em>enacts</em> it.</p>
     <p>This gallery treats his output as an information system organized around four failure modes of reading — each room isolating a distinct mechanism through which legibility activates, then breaks.</p>
     <div class="artist-stats" role="list">
       <div class="stat" role="listitem">
@@ -138,7 +151,8 @@
       <p>Each room isolates a distinct failure mode of legibility. Parasitic friction has been removed — confusion that prevented access. Load-bearing friction remains — confusion that is the artwork.</p>
     </div>
     <div class="rooms-grid" role="list">
-      <a href="#room-sky" class="room-card reveal" data-room="sky" role="listitem" aria-label="Room 01: Book from the Sky, 1987 to 1991">
+      <a href="#room-sky" class="room-card reveal" data-room="sky" role="listitem"
+         aria-label="Room 01: Book from the Sky, 1987 to 1991">
         <div class="room-num" aria-hidden="true">Room 01 / 04</div>
         <span class="room-glyph" aria-hidden="true">天</span>
         <div class="room-title">Book from the Sky</div>
@@ -146,7 +160,8 @@
         <div class="room-desc">4,000 hand-carved pseudo-characters printed in classical format. Recognition fails not at the character level, but at the moment of expected meaning.</div>
         <div class="room-arrow" aria-hidden="true">↗</div>
       </a>
-      <a href="#room-english" class="room-card reveal delay-1" data-room="english" role="listitem" aria-label="Room 02: New English Calligraphy, 1994 to present">
+      <a href="#room-english" class="room-card reveal delay-1" data-room="english" role="listitem"
+         aria-label="Room 02: New English Calligraphy, 1994 to present">
         <div class="room-num" aria-hidden="true">Room 02 / 04</div>
         <span class="room-glyph" aria-hidden="true">英</span>
         <div class="room-title">New English Calligraphy</div>
@@ -154,7 +169,8 @@
         <div class="room-desc">Roman letters reconfigured into square-character forms. Neither Chinese readers nor English readers gain access — cross-cultural illegibility as design principle.</div>
         <div class="room-arrow" aria-hidden="true">↗</div>
       </a>
-      <a href="#room-square" class="room-card reveal delay-2" data-room="square" role="listitem" aria-label="Room 03: Square Word Calligraphy, 2002 to present">
+      <a href="#room-square" class="room-card reveal delay-2" data-room="square" role="listitem"
+         aria-label="Room 03: Square Word Calligraphy, 2002 to present">
         <div class="room-num" aria-hidden="true">Room 03 / 04</div>
         <span class="room-glyph" aria-hidden="true">方</span>
         <div class="room-title">Square Word Calligraphy</div>
@@ -162,7 +178,8 @@
         <div class="room-desc">English words written in the structural grammar of Chinese calligraphy. Visual universalism as interface paradox — familiar strokes, foreign resolution.</div>
         <div class="room-arrow" aria-hidden="true">↗</div>
       </a>
-      <a href="#theory" class="room-card reveal delay-3" data-room="games" role="listitem" aria-label="Room 04: Language Games, 2010s to present">
+      <a href="#theory" class="room-card reveal delay-3" data-room="games" role="listitem"
+         aria-label="Room 04: Language Games, 2010s to present">
         <div class="room-num" aria-hidden="true">Room 04 / 04</div>
         <span class="room-glyph" aria-hidden="true">戲</span>
         <div class="room-title">Language Games</div>
@@ -187,12 +204,13 @@
         <span class="breadcrumb-current">Room 01</span>
       </div>
       <a href="#foyer" class="back-btn" aria-label="Return to foyer">← Foyer</a>
-      <div class="section-label reveal">Room 01 — Recognition Failure</div>
+      <div class="section-label reveal">Room 01 — Recognition Failure · R1/R2</div>
       <h2 class="reveal">Book from the Sky</h2>
       <p class="tagline reveal">天書 / Tiānshū — "A Book from the Sky"</p>
+      <div class="authorship-tag reveal">Curatorial Note</div>
       <p class="reveal">Between 1987 and 1991, Xu Bing hand-carved 4,000 unique pseudo-characters — glyphs that deploy every structural convention of classical Chinese script (radical composition, stroke order, spatial density) while remaining semantically void. No character maps to any lexeme in any known language.</p>
-      <p class="reveal delay-1">The phenomenological trap: readers fluent in Chinese experience the deepest frustration. The characters activate every layer of orthographic recognition — visual, structural, phonological — but semantic resolution never arrives. The reading apparatus is weaponized against itself.</p>
-      <p class="reveal delay-1">Printed across 600 volumes and suspended across gallery ceilings, the installation performs institutional legitimacy while transmitting nothing.</p>
+      <p class="reveal delay-1">The phenomenological trap: readers fluent in Chinese experience the deepest frustration. The characters activate every layer of orthographic recognition — visual, structural, phonological — but semantic resolution never arrives. The more fluent the reader, the more acutely the failure registers.</p>
+      <p class="reveal delay-1">Printed across 600 volumes and suspended across gallery ceilings, the installation adopts the visual authority of traditional printed form while suspending readable semantic content.</p>
       <div class="reveal delay-2">
         <span class="artwork-tag">Installation</span>
         <span class="artwork-tag">Print</span>
@@ -244,12 +262,13 @@
         <span class="breadcrumb-current">Room 02</span>
       </div>
       <a href="#foyer" class="back-btn" aria-label="Return to foyer">← Foyer</a>
-      <div class="section-label gold reveal">Room 02 — Cross-Cultural Illegibility</div>
+      <div class="section-label gold reveal">Room 02 — Cross-Cultural Illegibility · R3</div>
       <h2 class="reveal">New English Calligraphy</h2>
       <p class="tagline gold reveal">英文书法 / A system that excludes every reader</p>
+      <div class="authorship-tag reveal">Curatorial Note</div>
       <p class="reveal">In 1994, Xu Bing developed a complete system for rendering English text in the visual grammar of Chinese calligraphy. Roman letters are decomposed into strokes and recomposed as square-character units. The result is neither English nor Chinese.</p>
       <p class="reveal delay-1">The failure mode is symmetric: Chinese readers see the structural conventions of their script but cannot resolve the Roman letterforms. English readers recognize something approaching their alphabet but cannot read the calligraphic composition. Neither community has legibility priority.</p>
-      <p class="reveal delay-2">HCI implication: interface legibility is not a property of an artifact but of the alignment between artifact grammar and reader competency. Xu Bing manufactures misalignment as content.</p>
+      <p class="reveal delay-2">HCI implication: interface legibility is not a property of an artifact but of the alignment between artifact grammar and reader competence. Xu Bing manufactures misalignment as content.</p>
     </div>
   </div>
 </section>
@@ -267,12 +286,13 @@
         <span class="breadcrumb-current">Room 03</span>
       </div>
       <a href="#foyer" class="back-btn" aria-label="Return to foyer">← Foyer</a>
-      <div class="section-label teal reveal">Room 03 — Visual Universalism</div>
+      <div class="section-label teal reveal">Room 03 — Visual Universalism · R5</div>
       <h2 class="reveal">Square Word Calligraphy</h2>
       <p class="tagline teal reveal">方块字书法 / The grammar of the visible</p>
+      <div class="authorship-tag reveal">Curatorial Note</div>
       <p class="reveal">Square Word Calligraphy inverts the New English Calligraphy problem. Where that work trapped English inside Chinese structure, Square Word proposes a universal visual language derived from the spatial logic of character composition — without the cultural baggage of either system.</p>
-      <p class="reveal delay-1">Words like "TREE" or "MOUNTAIN" are rendered in stroke-order sequences that honor the pictographic origins of Chinese script while remaining legible as English phonemes. The cognitive rupture is gentler — but the epistemological claim is larger: that visual grammar can transcend linguistic enculturation.</p>
-      <p class="reveal delay-2">This claim fails productively. Users who have studied Chinese calligraphy read differently than those who have not. The "universal" turns out to be stratified by training.</p>
+      <p class="reveal delay-1">Words like "TREE" or "MOUNTAIN" are rendered in stroke-order sequences that honor the pictographic origins of Chinese script while remaining decodable as English words. The cognitive rupture is gentler — but the epistemological claim is larger: that visual grammar can transcend linguistic enculturation.</p>
+      <p class="reveal delay-2">This claim remains uneven in practice. Viewers who have studied Chinese calligraphy read the work differently from those who have not. The "universal" turns out to be stratified by training.</p>
       <div class="reveal delay-2">
         <span class="artwork-tag">Calligraphy</span>
         <span class="artwork-tag">Workshop-based</span>
@@ -284,8 +304,11 @@
         <div class="artwork-visual" style="background:var(--ink);min-height:280px;">
           <div style="padding:2.5rem;text-align:center;width:100%;">
             <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:0.3em;color:var(--teal);margin-bottom:2rem;" aria-hidden="true">SQUARE WORD — LIVE COMPOSITION</div>
-            <div id="square-word-display" style="font-family:var(--cjk);font-size:clamp(2.5rem,8vw,5rem);color:var(--paper);opacity:0.85;line-height:1.2;min-height:80px;transition:all 0.4s;" aria-live="polite" aria-label="Square word character display"></div>
-            <div style="margin-top:2rem;display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;" id="sw-controls" role="group" aria-label="Select a word to see its Square Word rendering"></div>
+            <div id="square-word-display"
+                 style="font-family:var(--cjk);font-size:clamp(2.5rem,8vw,5rem);color:var(--paper);opacity:0.85;line-height:1.2;min-height:80px;transition:all 0.4s;"
+                 aria-live="polite" aria-label="Square word character display"></div>
+            <div style="margin-top:2rem;display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;"
+                 id="sw-controls" role="group" aria-label="Select a word to see its Square Word rendering"></div>
           </div>
         </div>
         <div class="artwork-info">
@@ -303,7 +326,7 @@
      ════════════════════════════════════════ -->
 <section id="glyph-tool" aria-label="Glyph Deconstruction Engine">
   <div class="tool-inner">
-    <div class="section-label reveal" style="justify-content:center;">Interactive Instrument</div>
+    <div class="section-label reveal" style="justify-content:center;">Interactive Instrument — R4</div>
     <h2 class="reveal">Glyph Deconstruction Engine</h2>
     <p class="tool-intro reveal">
       A character appears. Classify it — before the system reveals its category.<br>
@@ -322,6 +345,7 @@
     </div>
     <div class="glyph-options reveal delay-1" id="glyph-options"
          role="group" aria-label="Classify this character — choose its type">
+      <!-- Populated by JS -->
     </div>
     <div class="glyph-next-wrap reveal delay-2" id="glyph-next-wrap" style="display:none;">
       <button class="glyph-btn danger" id="glyph-next-btn" aria-label="Show next glyph">
@@ -338,9 +362,10 @@
   <div class="timeline-inner">
     <div class="timeline-header reveal">
       <div class="section-label">Temporal Path</div>
-      <h2>Linguistic Evolution, 1987–2025</h2>
+      <h2>Language, Misreading, and Translation</h2>
     </div>
     <div class="timeline-track" role="list">
+
       <div class="timeline-item" role="listitem">
         <div class="timeline-dot" aria-hidden="true"></div>
         <div class="timeline-year">1987</div>
@@ -348,6 +373,7 @@
         <div class="timeline-detail">Beijing Exhibition Hall. Chinese authorities interpret the pseudo-characters as coded political dissent. The work is accused of "spiritual pollution" — a foundational misreading that Xu Bing incorporates into his subsequent methodology.</div>
         <a href="#theory" class="timeline-theory-link" aria-label="Related concept: Cognitive Rupture">Cognitive Rupture</a>
       </div>
+
       <div class="timeline-item" role="listitem">
         <div class="timeline-dot" aria-hidden="true"></div>
         <div class="timeline-year">1990</div>
@@ -355,44 +381,44 @@
         <div class="timeline-detail">Xu Bing arrives in a second system of total illegibility. English is now his pseudo-character environment. Cross-cultural semiotic failure becomes biographical, not merely theoretical.</div>
         <a href="#theory" class="timeline-theory-link" aria-label="Related concept: Semiotic Border">Semiotic Border</a>
       </div>
+
       <div class="timeline-item" role="listitem">
         <div class="timeline-dot gold" aria-hidden="true"></div>
         <div class="timeline-year">1994</div>
-        <div class="timeline-event">New English Calligraphy System Formalized</div>
-        <div class="timeline-detail">Complete pedagogical system developed: stroke order manuals, practice sheets, workshop curriculum. The system is institutionally transmissible — meaning can be taught without being conveyed.</div>
+        <div class="timeline-event">New English Calligraphy — System Formalized</div>
+        <div class="timeline-detail">Roman letters decomposed into strokes and recomposed as square-character units. Xu Bing formalizes a complete pedagogical system — stroke order manuals, practice sheets, workshop curriculum — institutionally transmissible as instruction even though legibility is never restored.</div>
         <a href="#theory" class="timeline-theory-link" aria-label="Related concept: Pseudo-Legibility">Pseudo-Legibility</a>
       </div>
+
       <div class="timeline-item" role="listitem">
         <div class="timeline-dot" aria-hidden="true"></div>
         <div class="timeline-year">1999</div>
         <div class="timeline-event">MacArthur Fellowship</div>
         <div class="timeline-detail">Recognition within the English-language institutional apparatus — an irony Xu Bing notes: awarded for work that makes English unreadable.</div>
       </div>
+
       <div class="timeline-item" role="listitem">
         <div class="timeline-dot teal" aria-hidden="true"></div>
         <div class="timeline-year">2002</div>
         <div class="timeline-event">Square Word Calligraphy — First Major Exhibition</div>
-        <div class="timeline-detail">Brooklyn Museum. The pedagogical workshops generate measurable data: English-only speakers achieve partial legibility after 3 hours of instruction. Chinese calligraphers read differently — faster structure, slower phonology.</div>
+        <div class="timeline-detail">Brooklyn Museum. Workshop participants report that legibility can increase with guided practice, though access remains partial and varies by prior training. Viewers with Chinese calligraphy backgrounds navigate the structural grammar differently from those without.</div>
         <a href="#theory" class="timeline-theory-link" aria-label="Related concept: Reading Failure">Reading Failure</a>
       </div>
+
       <div class="timeline-item" role="listitem">
         <div class="timeline-dot" aria-hidden="true"></div>
         <div class="timeline-year">2009</div>
         <div class="timeline-event">Return to Beijing — CAFA Vice President</div>
         <div class="timeline-detail">The artist who was accused of political subversion through pseudo-script returns to head China's premier art academy. The institutional frame has inverted; the work has not.</div>
       </div>
+
       <div class="timeline-item" role="listitem">
         <div class="timeline-dot gold" aria-hidden="true"></div>
         <div class="timeline-year">2014</div>
-        <div class="timeline-event">Book from the Ground — Global Release</div>
-        <div class="timeline-detail">A novel written entirely in emoji and public pictograms. The inversion of Book from the Sky: a text anyone can read, regardless of language, because it exploits universal icon systems rather than subverting them.</div>
+        <div class="timeline-event">Book from the Ground — English-Language Publication</div>
+        <div class="timeline-detail">A novel written entirely in emoji and public pictograms. The inversion of Book from the Sky: a text designed to be readable across language barriers — for any reader familiar with contemporary pictographic conventions — because it exploits shared icon systems rather than subverting them.</div>
       </div>
-      <div class="timeline-item" role="listitem">
-        <div class="timeline-dot teal" aria-hidden="true"></div>
-        <div class="timeline-year">2020</div>
-        <div class="timeline-event">Xu Bing Archives — Digital Preservation Initiative</div>
-        <div class="timeline-detail">Stroke-level documentation of all 4,000 Book from the Sky characters begins. OpenSeadragon deep-zoom integration enables stroke-order analysis for the first time in a public digital context.</div>
-      </div>
+
     </div>
   </div>
 </section>
@@ -405,10 +431,9 @@
     <div class="section-label reveal">Theoretical Frame</div>
     <h2 class="reveal">Legibility vs. Enactment — The Core Design Tension</h2>
 
-    <div class="authorship-tag reveal">Artist's Statement</div>
+    <div class="authorship-tag reveal">Curatorial Note</div>
     <blockquote class="reveal">
-      "I am interested in the moment when a reader's confidence collapses — when the reading apparatus, fully engaged, finds nothing to hold. That gap is where art lives."
-      <cite>— Xu Bing, in conversation with Jerome Silbergeld, 2006</cite>
+      Xu Bing's practice, as framed in Silbergeld and Ching's critical writing (2006), centers on the moment when the reading apparatus encounters a structure it cannot resolve. Recognition activates fully; meaning does not arrive. This gallery treats that gap — between legibility and comprehension — not as a failure of the artwork, but as its central mechanism.
     </blockquote>
 
     <div class="authorship-tag reveal">Curatorial Note</div>
@@ -453,7 +478,7 @@
         "This system is designed to produce one moment of reading failure per visit.<br>Did you encounter it?"
       </div>
       <div class="theory-meta-body">
-        The entry button was unreadable. The Glyph Engine required a classification attempt before the label appeared. Both moments were unavoidable. If you navigated around them, the interface did not succeed — and that is also data.
+        The entry button was unreadable. The Glyph Engine required a classification attempt before the label appeared. Both moments were unavoidable. If these moments were bypassed, the intended interpretive sequence became less effective — and that is a meaningful outcome to consider.
       </div>
       <div class="theory-meta-checks" role="list">
         <a href="#hero" class="theory-check pending" id="check-entry" role="listitem" aria-label="Entry: unreadable button">
@@ -522,14 +547,62 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>Book from the Sky (天書)</td><td>1987–91</td><td>Handmade books, woodblock print</td><td>MoMA, Tate, Guggenheim Bilbao</td><td>Silbergeld &amp; Ching, 2006</td></tr>
-          <tr><td>New English Calligraphy</td><td>1994–</td><td>Ink on xuan paper</td><td>Brooklyn Museum, V&amp;A London</td><td>Erickson, 2001</td></tr>
-          <tr><td>Square Word Calligraphy</td><td>2002–</td><td>Mixed, workshop-based</td><td>Multiple private collections</td><td>Xu Bing Studio Archives</td></tr>
-          <tr><td>A Case Study of Transference</td><td>1993–94</td><td>Performance installation</td><td>American Fine Arts, NY</td><td>MoMA Online Collection</td></tr>
-          <tr><td>Book from the Ground (地书)</td><td>2003–14</td><td>Pictographic novel, digital</td><td>UCCA Beijing</td><td>Xu Bing, 2013</td></tr>
-          <tr><td>Phoenix (凤凰)</td><td>2008–10</td><td>Industrial debris, steel</td><td>Mass MoCA, St John the Divine</td><td>Pollack, 2014</td></tr>
-          <tr><td>Tobacco Project</td><td>1999–2011</td><td>Cigarettes, tobacco, text</td><td>Virginia Museum of Fine Arts</td><td>Virginia MOCA Archives</td></tr>
-          <tr><td>Background Story Series</td><td>2004–</td><td>Backlit landscape paintings</td><td>British Museum</td><td>British Museum Catalogue</td></tr>
+          <tr>
+            <td>Book from the Sky (天書)</td>
+            <td>1987–91</td>
+            <td>Handmade books, woodblock print</td>
+            <td>MoMA, Tate, Guggenheim Bilbao</td>
+            <td>Silbergeld &amp; Ching, 2006</td>
+          </tr>
+          <tr>
+            <td>New English Calligraphy</td>
+            <td>1994–</td>
+            <td>Ink on xuan paper</td>
+            <td>Brooklyn Museum, V&amp;A London</td>
+            <td>Erickson, 2001</td>
+          </tr>
+          <tr>
+            <td>Square Word Calligraphy</td>
+            <td>2002–</td>
+            <td>Mixed, workshop-based</td>
+            <td>Multiple private collections</td>
+            <td>Xu Bing Studio Archives</td>
+          </tr>
+          <tr>
+            <td>A Case Study of Transference</td>
+            <td>1993–94</td>
+            <td>Performance installation</td>
+            <td>American Fine Arts, NY</td>
+            <td>MoMA Online Collection</td>
+          </tr>
+          <tr>
+            <td>Book from the Ground (地书)</td>
+            <td>2003–14</td>
+            <td>Pictographic novel, digital</td>
+            <td>UCCA Beijing</td>
+            <td>Xu Bing, 2013</td>
+          </tr>
+          <tr>
+            <td>Phoenix (凤凰)</td>
+            <td>2008–10</td>
+            <td>Industrial debris, steel</td>
+            <td>Mass MoCA, St John the Divine</td>
+            <td>Pollack, 2014</td>
+          </tr>
+          <tr>
+            <td>Tobacco Project</td>
+            <td>1999–2011</td>
+            <td>Cigarettes, tobacco, text</td>
+            <td>Virginia Museum of Fine Arts</td>
+            <td>Virginia MOCA Archives</td>
+          </tr>
+          <tr>
+            <td>Background Story Series</td>
+            <td>2004–</td>
+            <td>Backlit landscape paintings</td>
+            <td>British Museum</td>
+            <td>British Museum Catalogue</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -544,12 +617,10 @@
     <div>
       <div class="footer-brand">徐冰 — Epistemic Gallery</div>
       <div class="footer-meta">
-        An interface that enacts reading failure — not documents it.<br>
-
+        An interface that enacts reading failure — not one that documents it.<br>
       </div>
     </div>
     <div class="footer-right">
-
       <div class="footer-note">
         2026<br>
         HTML / CSS / JS · Adobe Aero AR<br>

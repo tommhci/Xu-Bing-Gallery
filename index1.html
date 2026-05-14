@@ -1,0 +1,2146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xu Bing: Epistemic Gallery — v2.7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+SC:wght@300;400;500&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS v2.5
+   ═══════════════════════════════════════════════════ */
+:root {
+  --ink:             #07070a;
+  --deep:            #0d0c10;
+  --surface:         #13121a;
+  --muted:           #1e1c28;
+  --paper:           #f0e6d3;
+  --paper-dim:       #c8bba8;
+  --paper-ghost:     rgba(240,230,211,0.07);
+  --paper-ghost2:    rgba(240,230,211,0.04);
+
+  --vermillion:      #bf2929;
+  --vermillion-soft: rgba(191,41,41,0.18);
+  --vermillion-glow: rgba(191,41,41,0.35);
+  --gold:            #c9a356;
+  --gold-soft:       rgba(201,163,86,0.15);
+  --teal:            #3a8c8c;
+  --teal-soft:       rgba(58,140,140,0.15);
+  --violet:          #7a5cbf;
+  --violet-soft:     rgba(122,92,191,0.15);
+
+  /* Room accent system — REQ-02 Orientation */
+  --room-1: #bf2929;
+  --room-2: #c9a356;
+  --room-3: #3a8c8c;
+  --room-4: #7a5cbf;
+
+  --border:          rgba(240,230,211,0.09);
+  --border-strong:   rgba(240,230,211,0.20);
+
+  --serif: 'EB Garamond', Georgia, serif;
+  --cjk:   'Noto Serif SC', 'EB Garamond', serif;
+  --mono:  'Space Mono', monospace;
+
+  /* Active room tracking */
+  --current-room-color: var(--vermillion);
+  --current-room-name:  "";
+}
+
+/* ═══════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--serif);
+  font-size: 18px;
+  line-height: 1.7;
+  cursor: crosshair;
+}
+::selection { background: var(--vermillion); color: var(--paper); }
+section { position: relative; }
+
+/* ═══════════════════════════════════════════════════
+   LOADER
+   ═══════════════════════════════════════════════════ */
+#loader {
+  position: fixed; inset: 0; z-index: 1000;
+  background: var(--ink);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+#loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.loader-chars {
+  font-family: var(--cjk); font-size: clamp(2rem,6vw,4rem);
+  color: var(--paper); letter-spacing: 0.2em;
+  opacity: 0; animation: fadeIn 3s ease forwards 0.5s;
+}
+.loader-sub {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--paper-dim);
+  letter-spacing: 0.35em; text-transform: uppercase; margin-top: 1.5rem;
+  opacity: 0; animation: fadeIn 1s ease forwards 2.5s;
+}
+.loader-bar {
+  width: 200px; height: 1px; background: var(--border);
+  margin-top: 2rem; overflow: hidden;
+  opacity: 0; animation: fadeIn 0.5s ease forwards 1.5s;
+}
+.loader-bar-fill {
+  height: 100%; background: var(--vermillion);
+  width: 0%; animation: fillBar 2s ease forwards 1.5s;
+}
+@keyframes fillBar    { to { width: 100%; } }
+@keyframes fadeIn     { to { opacity: 1; } }
+@keyframes fadeInUp   { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ═══════════════════════════════════════════════════
+   CURSOR + PROGRESS
+   ═══════════════════════════════════════════════════ */
+.cursor-dot {
+  position: fixed; width: 6px; height: 6px;
+  background: var(--vermillion); border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: transform 0.1s, background 0.2s;
+}
+.cursor-dot.on-entry { background: var(--paper); transform: translate(-50%,-50%) scale(2.5); }
+#progress-bar {
+  position: fixed; top: 0; left: 0; height: 2px;
+  background: var(--vermillion); z-index: 500;
+  width: 0%; transition: width 0.1s;
+}
+
+/* ═══════════════════════════════════════════════════
+   REVEAL ANIMATION
+   ═══════════════════════════════════════════════════ */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible  { opacity: 1; transform: translateY(0); }
+.reveal.delay-1  { transition-delay: 0.12s; }
+.reveal.delay-2  { transition-delay: 0.24s; }
+.reveal.delay-3  { transition-delay: 0.36s; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .timeline-item { transition: none !important; animation: none !important; }
+  .reveal { opacity: 1; transform: none; }
+}
+
+/* ═══════════════════════════════════════════════════
+   SECTION LABEL
+   ═══════════════════════════════════════════════════ */
+.section-label {
+  font-family: var(--mono); font-size: 0.58rem;
+  letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--vermillion); margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 0.8rem;
+}
+.section-label::before {
+  content: ''; display: block; width: 20px; height: 1px;
+  background: var(--vermillion);
+}
+.section-label.gold  { color: var(--gold);  }
+.section-label.gold::before  { background: var(--gold);  }
+.section-label.teal  { color: var(--teal);  }
+.section-label.teal::before  { background: var(--teal);  }
+.section-label.violet { color: var(--violet); }
+.section-label.violet::before { background: var(--violet); }
+
+/* ═══════════════════════════════════════════════════
+   BREADCRUMB — REQ-02 Orientation Stability
+   ═══════════════════════════════════════════════════ */
+.breadcrumb {
+  font-family: var(--mono); font-size: 0.72rem; /* was 0.55rem — K-08, D-09: below readable threshold */
+  letter-spacing: 0.15em; color: var(--paper-dim);
+  text-transform: uppercase; margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 0.5rem;
+  opacity: 1; /* was 0.7 — R2.3 legibility fix */
+}
+.breadcrumb a {
+  color: var(--paper-dim); text-decoration: none;
+  transition: color 0.2s;
+}
+.breadcrumb a:hover { color: var(--paper); }
+.breadcrumb-sep { opacity: 0.4; }
+.breadcrumb-current { color: var(--paper); }
+
+/* Back button */
+.back-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--mono); font-size: 0.72rem; /* was 0.55rem — R2.3 legibility fix */
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--paper-dim); text-decoration: none;
+  border: 1px solid var(--border); padding: 0.5rem 1rem;
+  transition: all 0.2s; cursor: crosshair;
+  min-height: 44px; /* touch target */
+  margin-bottom: 2rem;
+}
+.back-btn:hover { border-color: var(--border-strong); color: var(--paper); }
+
+/* ═══════════════════════════════════════════════════
+   BUTTON BASE
+   ═══════════════════════════════════════════════════ */
+.glyph-btn {
+  background: none; border: 1px solid var(--border-strong);
+  color: var(--paper-dim); font-family: var(--mono);
+  font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 0.7rem 1.2rem; cursor: crosshair;
+  transition: all 0.2s; min-height: 44px; /* touch target */
+}
+.glyph-btn:hover,
+.glyph-btn.active  { background: var(--paper-ghost); border-color: var(--paper); color: var(--paper); }
+.glyph-btn.danger  { border-color: var(--vermillion); color: var(--vermillion); }
+.glyph-btn.danger:hover { background: var(--vermillion-soft); }
+.glyph-btn.success { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
+.glyph-btn.fail    { border-color: var(--vermillion); color: var(--vermillion); background: var(--vermillion-soft); }
+
+blockquote {
+  border-left: 2px solid var(--vermillion); padding: 1.5rem 2rem;
+  margin: 2rem 0; background: var(--paper-ghost);
+  font-style: italic; font-size: 1.1rem; line-height: 1.8; color: var(--paper);
+}
+blockquote cite {
+  display: block; font-style: normal; font-family: var(--mono);
+  font-size: 0.6rem; letter-spacing: 0.15em; color: var(--paper-dim); margin-top: 1rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   NAV — v2.5: 3-column grid + YOU ARE HERE
+   Scoped to #nav only so breadcrumb/minimap <div>s
+   are never polluted by these fixed-position rules.
+   ═══════════════════════════════════════════════════ */
+nav#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  padding: 1.2rem 2.5rem;
+  /* 3-col: brand | links (centered) | indicator */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  background: linear-gradient(to bottom, rgba(7,7,10,0.95) 0%, transparent 100%);
+  transition: background 0.3s;
+}
+nav#nav.scrolled { background: rgba(7,7,10,0.97); border-bottom: 1px solid var(--border); }
+
+.nav-brand {
+  font-family: var(--cjk); font-size: 1rem; letter-spacing: 0.08em;
+  color: var(--paper); text-decoration: none;
+  display: flex; align-items: center; gap: 0.8rem;
+  /* grid col 1 — stays left */
+}
+.nav-brand-mark {
+  width: 28px; height: 28px; border: 1px solid var(--vermillion);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; color: var(--vermillion); font-family: var(--cjk);
+}
+
+/* Center column — always centred regardless of indicator width */
+.nav-links {
+  display: flex; gap: 2rem; list-style: none; align-items: center;
+  /* grid col 2 — auto width, centred by 1fr on both sides */
+}
+.nav-links a {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--paper-dim);
+  text-decoration: none; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--paper); }
+
+/* Right column wrapper — holds the YOU ARE HERE pill */
+.nav-right {
+  display: flex; justify-content: flex-end; align-items: center;
+  /* grid col 3 */
+}
+
+/* YOU ARE HERE pill — REQ-02 */
+#nav-room-indicator {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.2em;
+  text-transform: uppercase; padding: 0.35rem 0.8rem;
+  border: 1px solid var(--vermillion);
+  color: var(--vermillion);
+  opacity: 0; transition: opacity 0.4s, border-color 0.4s, color 0.4s;
+  white-space: nowrap;
+}
+#nav-room-indicator.visible { opacity: 1; }
+#nav-room-indicator::before {
+  content: '→'; font-size: 0.5rem; opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════════════
+   MINIMAP
+   ═══════════════════════════════════════════════════ */
+#minimap {
+  position: fixed; right: 1.5rem; top: 50%;
+  transform: translateY(-50%); z-index: 300;
+  display: flex; flex-direction: column; gap: 0.6rem; align-items: center;
+}
+@media (max-width: 768px) { #minimap { display: none; } }
+.mm-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--border-strong); transition: all 0.3s; cursor: crosshair;
+  position: relative;
+}
+.mm-dot.active { background: var(--vermillion); transform: scale(1.6); }
+/* Room-colored active dots */
+.mm-dot[data-target="room-sky"].active    { background: var(--room-1); }
+.mm-dot[data-target="room-english"].active { background: var(--room-2); }
+.mm-dot[data-target="room-square"].active  { background: var(--room-3); }
+/* Tooltip label on hover */
+.mm-dot[data-label]:hover::after {
+  content: attr(data-label);
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.1em;
+  color: var(--paper-dim); white-space: nowrap;
+  background: var(--deep); padding: 0.2rem 0.5rem;
+  border: 1px solid var(--border); pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════ */
+#hero {
+  min-height: 100vh; display: grid; place-items: center;
+  overflow: hidden; padding: 6rem 2rem 4rem;
+}
+.pseudo-bg {
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(60px,1fr));
+  opacity: 0.03; pointer-events: none; overflow: hidden;
+}
+.pseudo-char {
+  font-family: var(--cjk); font-size: 1.4rem; color: var(--paper);
+  display: flex; align-items: center; justify-content: center; padding: 10px;
+  animation: pulseChar var(--dur,4s) ease-in-out infinite;
+  animation-delay: var(--delay,0s);
+}
+@keyframes pulseChar {
+  0%,100% { opacity: 0.3; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.05); }
+}
+.hero-inner {
+  position: relative; z-index: 2; text-align: center; max-width: 900px;
+}
+.hero-eyebrow {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.4em;
+  text-transform: uppercase; color: var(--vermillion); margin-bottom: 2.5rem;
+  display: flex; align-items: center; justify-content: center; gap: 1rem;
+}
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: ''; display: block; width: 40px; height: 1px;
+  background: var(--vermillion); opacity: 0.6;
+}
+.hero-title {
+  font-family: var(--cjk); font-size: clamp(3.5rem,8vw,7rem);
+  font-weight: 300; line-height: 1.05; letter-spacing: -0.01em; margin-bottom: 1rem;
+}
+.hero-title span {
+  display: block; font-size: clamp(1.2rem,3vw,2rem); font-weight: 400;
+  letter-spacing: 0.5em; margin-top: 0.8rem;
+  color: var(--paper-dim); font-family: var(--mono);
+}
+.hero-subtitle {
+  font-family: var(--serif); font-size: clamp(1rem,1.8vw,1.2rem);
+  font-style: italic; color: var(--paper-dim);
+  max-width: 560px; margin: 2.5rem auto; line-height: 1.9;
+}
+.hero-ctas { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+/* ── v2.5 ENTRY RUPTURE: Pseudo-char CTA — REQ-01 ── */
+.entry-rupture-wrap {
+  position: relative; display: inline-flex; flex-direction: column; align-items: center;
+}
+.entry-btn-pseudo {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 80px; min-height: 80px; /* large touch target */
+  border: 1px solid var(--vermillion);
+  background: var(--vermillion);
+  font-family: var(--cjk); font-size: 2.4rem; color: var(--paper);
+  cursor: crosshair; text-decoration: none;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+  position: relative; overflow: hidden;
+}
+.entry-btn-pseudo::before {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(240,230,211,0.12);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.entry-btn-pseudo:hover::before { transform: scaleX(1); }
+.entry-btn-pseudo:hover { box-shadow: 0 0 32px var(--vermillion-glow); transform: scale(1.04); }
+/* P4 — Persistent pre-hover affordance ring (R1.1).
+   Subtle pulsing outline signals interactivity before hover.
+   Does NOT reveal the character or remove the 3-second delay. */
+.entry-btn-pseudo::after {
+  content: ''; position: absolute;
+  inset: -5px; border: 1px solid rgba(191,41,41,0.28);
+  animation: entryRingPulse 3.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes entryRingPulse {
+  0%,100% { opacity: 0; transform: scale(0.97); }
+  50%      { opacity: 1; transform: scale(1.02); }
+}
+
+/* Tooltip that reveals after 3s — first "reading" hint */
+.entry-tooltip {
+  font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.2em;
+  color: var(--paper-dim); margin-top: 0.8rem; text-transform: uppercase;
+  opacity: 0; transition: opacity 0.8s ease;
+  animation: none;
+}
+.entry-tooltip.revealed { opacity: 1; }
+
+.hero-cta-secondary {
+  display: inline-flex; align-items: center; gap: 0.8rem;
+  border: 1px solid var(--border-strong); padding: 0.9rem 2rem;
+  font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.25em;
+  text-transform: uppercase; color: var(--paper); text-decoration: none;
+  transition: all 0.3s; cursor: crosshair; min-height: 44px;
+}
+.hero-cta-secondary:hover { background: var(--paper-ghost); border-color: var(--paper); }
+
+.hero-scroll-hint {
+  position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.3em;
+  color: var(--paper-dim); text-transform: uppercase;
+  display: flex; flex-direction: column; align-items: center; gap: 0.8rem;
+}
+.scroll-line {
+  width: 1px; height: 50px;
+  background: linear-gradient(to bottom, var(--paper-dim), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%,100% { opacity: 0.3; transform: scaleY(1); }
+  50%      { opacity: 1;   transform: scaleY(1.2); }
+}
+
+/* ═══════════════════════════════════════════════════
+   ARTIST
+   ═══════════════════════════════════════════════════ */
+#artist {
+  padding: 8rem 2rem; max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center;
+}
+.artist-portrait {
+  position: relative; aspect-ratio: 3/4;
+  background: var(--surface); border: 1px solid var(--border);
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+}
+.artist-portrait-inner {
+  font-family: var(--cjk); font-size: 8rem;
+  color: rgba(240,230,211,0.04); line-height: 1; user-select: none;
+}
+.portrait-caption {
+  position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem;
+  background: linear-gradient(to top, rgba(7,7,10,0.95), transparent);
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.15em; color: var(--paper-dim);
+}
+.portrait-year {
+  position: absolute; top: 1rem; right: 1rem;
+  font-family: var(--mono); font-size: 0.58rem; color: var(--vermillion);
+  letter-spacing: 0.15em; border: 1px solid var(--vermillion); padding: 0.3rem 0.6rem;
+}
+.artist-text h2 {
+  font-family: var(--cjk); font-size: clamp(2rem,4vw,3.2rem);
+  font-weight: 400; line-height: 1.2; margin-bottom: 1.5rem;
+}
+.artist-text p {
+  font-size: 1rem; color: var(--paper-dim); line-height: 1.9; margin-bottom: 1.2rem;
+}
+.artist-stats {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 1px; background: var(--border); margin-top: 3rem; border: 1px solid var(--border);
+}
+.stat { background: var(--deep); padding: 1.2rem; text-align: center; }
+.stat-number { font-family: var(--mono); font-size: 1.6rem; color: var(--paper); display: block; line-height: 1; }
+.stat-label  { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.2em; color: var(--paper-dim); text-transform: uppercase; margin-top: 0.4rem; display: block; }
+
+/* ═══════════════════════════════════════════════════
+   FOYER — v2.5: room color coding
+   ═══════════════════════════════════════════════════ */
+#foyer {
+  padding: 6rem 2rem; background: var(--deep);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.foyer-inner { max-width: 1200px; margin: 0 auto; }
+.foyer-header { text-align: center; margin-bottom: 4rem; }
+.foyer-header h2 { font-family: var(--cjk); font-size: clamp(2rem,4vw,3rem); font-weight: 300; margin-top: 0.8rem; }
+.foyer-header p  { font-style: italic; color: var(--paper-dim); max-width: 500px; margin: 1.2rem auto 0; font-size: 0.95rem; }
+
+.rooms-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+  gap: 1px; background: var(--border); border: 1px solid var(--border);
+}
+.room-card {
+  background: var(--ink); padding: 2.5rem 2rem;
+  cursor: crosshair; transition: background 0.4s;
+  position: relative; overflow: hidden;
+  text-decoration: none; display: block; color: var(--paper);
+}
+.room-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--card-accent, var(--vermillion));
+  transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease;
+}
+/* Active color flood on hover */
+.room-card::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--card-accent-soft, transparent) 0%, transparent 60%);
+  opacity: 0; transition: opacity 0.4s;
+}
+.room-card:hover           { background: var(--surface); }
+.room-card:hover::before   { transform: scaleX(1); }
+.room-card:hover::after    { opacity: 1; }
+
+.room-card[data-room="sky"]     { --card-accent: var(--room-1); --card-accent-soft: rgba(191,41,41,0.06); }
+.room-card[data-room="english"] { --card-accent: var(--room-2); --card-accent-soft: rgba(201,163,86,0.06); }
+.room-card[data-room="square"]  { --card-accent: var(--room-3); --card-accent-soft: rgba(58,140,140,0.06); }
+.room-card[data-room="games"]   { --card-accent: var(--room-4); --card-accent-soft: rgba(122,92,191,0.06); }
+
+.room-num   { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.3em; color: var(--paper-dim); margin-bottom: 1.5rem; }
+.room-glyph { font-family: var(--cjk); font-size: 3.5rem; line-height: 1; margin-bottom: 1.2rem; display: block; opacity: 0.7; transition: opacity 0.3s, transform 0.3s; }
+.room-card:hover .room-glyph { opacity: 1; transform: scale(1.05); }
+.room-title  { font-family: var(--cjk); font-size: 1.15rem; font-weight: 400; margin-bottom: 0.6rem; }
+.room-years  { font-family: var(--mono); font-size: 0.6rem; color: var(--card-accent); letter-spacing: 0.1em; margin-bottom: 1rem; }
+.room-desc   { font-size: 0.88rem; color: var(--paper-dim); line-height: 1.7; position: relative; z-index: 1; }
+.room-arrow  { position: absolute; bottom: 1.5rem; right: 1.5rem; font-family: var(--mono); font-size: 0.7rem; color: var(--paper-dim); transition: color 0.3s, transform 0.3s; z-index: 1; }
+.room-card:hover .room-arrow { color: var(--paper); transform: translate(3px,-3px); }
+
+/* ═══════════════════════════════════════════════════
+   GALLERY ROOMS
+   ═══════════════════════════════════════════════════ */
+.gallery-room {
+  padding: 8rem 2rem; border-bottom: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.gallery-room:nth-child(even) { background: var(--deep); }
+
+/* Room accent stripe on left edge */
+.gallery-room::after {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 2px; height: 100%; opacity: 0.5;
+}
+#room-sky::after     { background: var(--room-1); }
+#room-english::after { background: var(--room-2); }
+#room-square::after  { background: var(--room-3); }
+
+.room-bg-char {
+  position: absolute; right: -2rem; top: 50%; transform: translateY(-50%);
+  font-family: var(--cjk); font-size: clamp(15rem,30vw,28rem);
+  color: rgba(240,230,211,0.02); line-height: 1;
+  pointer-events: none; user-select: none;
+}
+.room-inner {
+  max-width: 1200px; margin: 0 auto; position: relative; z-index: 2;
+  display: grid; grid-template-columns: 1fr 1.4fr; gap: 5rem; align-items: start;
+}
+.room-meta h2 { font-family: var(--cjk); font-size: clamp(2rem,4vw,3rem); font-weight: 300; line-height: 1.2; margin: 1rem 0 1.5rem; }
+.tagline      { font-style: italic; font-size: 1rem; padding-left: 1.2rem; border-left: 2px solid var(--vermillion); color: var(--paper-dim); margin-bottom: 2rem; display: block; }
+.tagline.gold { border-color: var(--gold); color: var(--gold); }
+.tagline.teal { border-color: var(--teal); color: var(--teal); }
+.room-meta p  { font-size: 0.95rem; color: var(--paper-dim); line-height: 1.9; margin-bottom: 1.2rem; }
+
+.artwork-tag {
+  display: inline-block; font-family: var(--mono); font-size: 0.55rem;
+  letter-spacing: 0.15em; text-transform: uppercase; border: 1px solid var(--border);
+  padding: 0.35rem 0.7rem; margin: 0.3rem 0.3rem 0 0; color: var(--paper-dim);
+}
+.artwork-card { border: 1px solid var(--border); overflow: hidden; background: var(--surface); }
+.artwork-visual {
+  min-height: 260px; background: var(--muted);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.char-matrix {
+  display: grid; grid-template-columns: repeat(8,1fr); width: 100%; padding: 1rem;
+  gap: 0;
+}
+.char-matrix span {
+  font-family: var(--cjk); font-size: clamp(1rem,2vw,1.3rem);
+  color: rgba(240,230,211,0.35); display: flex;
+  align-items: center; justify-content: center; padding: 8px;
+  border: 1px solid rgba(240,230,211,0.05); transition: all 0.3s;
+  cursor: crosshair;
+}
+.char-matrix span:hover { color: var(--paper); background: var(--paper-ghost); }
+.char-matrix span.dim  { opacity: 0.25; }
+.char-matrix span.highlight { color: var(--vermillion); border-color: rgba(191,41,41,0.2); }
+.artwork-info { padding: 1.5rem; }
+.artwork-title    { font-family: var(--cjk); font-size: 0.95rem; margin-bottom: 0.5rem; }
+.artwork-meta-line { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.1em; color: var(--paper-dim); margin-bottom: 0.8rem; }
+.artwork-desc  { font-size: 0.85rem; color: var(--paper-dim); line-height: 1.7; }
+
+/* ═══════════════════════════════════════════════════
+   GLYPH ENGINE v2.5 — GUESS-FIRST (REQ-01)
+   ═══════════════════════════════════════════════════ */
+#glyph-tool {
+  padding: 8rem 2rem; background: var(--deep);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.tool-inner { max-width: 800px; margin: 0 auto; text-align: center; }
+.tool-inner h2 { font-family: var(--cjk); font-size: clamp(2rem,4vw,3rem); font-weight: 300; margin: 1rem 0 1rem; }
+.tool-intro { font-size: 0.95rem; color: var(--paper-dim); font-style: italic; margin-bottom: 3rem; }
+
+.glyph-stage {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 3rem 2rem; margin-bottom: 2rem; position: relative;
+  overflow: hidden;
+}
+.glyph-stage-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--paper-dim); margin-bottom: 2rem;
+}
+.glyph-display {
+  font-family: var(--cjk); font-size: clamp(4rem,12vw,8rem);
+  color: var(--paper); line-height: 1; margin-bottom: 1.5rem;
+  transition: opacity 0.3s, transform 0.3s, color 0.4s;
+  min-height: 1em; display: flex; align-items: center; justify-content: center;
+}
+
+/* Guess-phase options — no labels, just A B C D */
+.glyph-options {
+  display: grid; grid-template-columns: repeat(2,1fr);
+  gap: 0.8rem; max-width: 400px; margin: 0 auto;
+}
+.glyph-option-btn {
+  background: rgba(240,230,211,0.025); /* P4: faint pre-hover tint — distinguishes from static elements (R2.1) */
+  border: 1px solid var(--border-strong);
+  color: var(--paper-dim); font-family: var(--mono);
+  font-size: 0.7rem; letter-spacing: 0.15em;
+  padding: 1rem; cursor: crosshair; transition: all 0.2s;
+  min-height: 56px; /* generous touch target */
+}
+.glyph-option-btn:hover { background: var(--paper-ghost); border-color: var(--paper); color: var(--paper); }
+.glyph-option-btn:disabled { cursor: not-allowed; }
+.glyph-option-btn.correct { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
+.glyph-option-btn.wrong   { border-color: var(--vermillion); color: var(--vermillion); background: var(--vermillion-soft); }
+.glyph-option-btn.reveal  { border-color: var(--border-strong); color: var(--paper-dim); }
+
+/* Reading status strip */
+.glyph-status {
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em;
+  text-transform: uppercase; margin-top: 1.5rem; min-height: 1.2em;
+  transition: color 0.4s;
+}
+.glyph-status.neutral  { color: var(--paper-dim); }
+.glyph-status.success  { color: var(--gold); }
+.glyph-status.failure  { color: var(--vermillion); }
+.glyph-status.resolved { color: var(--teal); }
+
+/* Result panel */
+.glyph-result {
+  background: var(--paper-ghost); border: 1px solid var(--border);
+  padding: 1.2rem; margin-top: 1rem; font-size: 0.88rem; color: var(--paper-dim);
+  text-align: left; opacity: 0; transition: opacity 0.4s;
+  font-style: italic; line-height: 1.7;
+}
+.glyph-result.visible { opacity: 1; }
+.glyph-result strong  { color: var(--paper); font-style: normal; }
+
+/* Next glyph button */
+.glyph-next-wrap { margin-top: 2rem; }
+
+/* Shake animation for wrong guess */
+@keyframes shakeGlyph {
+  0%,100% { transform: translateX(0); }
+  15%     { transform: translateX(-8px) rotate(-2deg); }
+  30%     { transform: translateX(8px) rotate(2deg); }
+  45%     { transform: translateX(-6px); }
+  60%     { transform: translateX(6px); }
+  75%     { transform: translateX(-3px); }
+}
+.glyph-display.shake { animation: shakeGlyph 0.5s ease; }
+
+/* Pulse animation for correct guess */
+@keyframes pulseGold {
+  0%   { text-shadow: 0 0 0 rgba(201,163,86,0); }
+  50%  { text-shadow: 0 0 40px rgba(201,163,86,0.6); }
+  100% { text-shadow: 0 0 0 rgba(201,163,86,0); }
+}
+.glyph-display.correct { animation: pulseGold 0.8s ease; color: var(--gold); }
+
+/* Score counter */
+.glyph-score {
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.2em;
+  color: var(--paper-dim); text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════
+   TIMELINE
+   ═══════════════════════════════════════════════════ */
+#timeline { padding: 8rem 2rem; overflow: hidden; }
+.timeline-inner { max-width: 900px; margin: 0 auto; }
+.timeline-header { margin-bottom: 4rem; }
+.timeline-header h2 { font-family: var(--cjk); font-size: clamp(2rem,4vw,3rem); font-weight: 300; margin-top: 0.8rem; }
+.timeline-track { position: relative; padding-left: 2.5rem; }
+.timeline-track::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 1px; background: var(--border);
+}
+.timeline-item {
+  position: relative; padding-bottom: 3rem; padding-left: 1.5rem;
+  opacity: 0; transform: translateX(-20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.timeline-item.visible { opacity: 1; transform: translateX(0); }
+.timeline-dot      { position: absolute; left: -2.5rem; top: 0.4rem; width: 8px; height: 8px; border-radius: 50%; background: var(--vermillion); }
+.timeline-dot.gold { background: var(--gold); }
+.timeline-dot.teal { background: var(--teal); }
+.timeline-year   { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; color: var(--vermillion); margin-bottom: 0.5rem; }
+.timeline-event  { font-family: var(--cjk); font-size: 1.1rem; margin-bottom: 0.4rem; }
+.timeline-detail { font-size: 0.88rem; color: var(--paper-dim); line-height: 1.7; }
+/* Theory cross-link badge on timeline items */
+.timeline-theory-link {
+  display: inline-block; font-family: var(--mono); font-size: 0.5rem;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--violet);
+  border: 1px solid rgba(122,92,191,0.3); padding: 0.2rem 0.5rem;
+  margin-top: 0.4rem; text-decoration: none; transition: all 0.2s;
+}
+.timeline-theory-link:hover { background: var(--violet-soft); }
+
+/* ═══════════════════════════════════════════════════
+   AUTHORSHIP TAG — R3.1 Authority Attribution
+   Addresses James's Authority Failure (J-08, J-11, J-12):
+   interpretive text lacked source category; users withheld
+   engagement because they could not determine whether they
+   were reading an artist statement or a curatorial claim.
+   ═══════════════════════════════════════════════════ */
+.authorship-tag {
+  display: inline-block;
+  font-family: var(--mono); font-size: 0.5rem;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  border: 1px solid rgba(201,163,86,0.3);
+  color: var(--gold); opacity: 0.85;
+  padding: 0.2rem 0.65rem;
+  margin-bottom: 0.9rem; margin-top: 0.2rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   NAVIGATION GUARD NOTICE — H3 / R2.4
+   ═══════════════════════════════════════════════════ */
+#nav-guard-notice {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  background: var(--deep); border: 1px solid var(--border-strong);
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--paper-dim);
+  padding: 0.6rem 1.6rem; z-index: 9000;
+  opacity: 0; transition: opacity 0.35s ease; pointer-events: none;
+  white-space: nowrap;
+}
+#nav-guard-notice.visible { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════
+   THEORY v2.5 — PROGRESSIVE REVEAL (REQ-03)
+   ═══════════════════════════════════════════════════ */
+#theory { padding: 8rem 2rem; background: var(--deep); border-top: 1px solid var(--border); }
+.theory-inner { max-width: 800px; margin: 0 auto; }
+.theory-inner h2 { font-family: var(--cjk); font-size: clamp(2rem,4vw,3rem); font-weight: 300; margin: 1rem 0 2.5rem; }
+.theory-inner p  { font-size: 0.95rem; color: var(--paper-dim); line-height: 1.9; margin-bottom: 1.2rem; }
+
+/* Concept grid — progressive */
+.concept-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap: 1px; background: var(--border); border: 1px solid var(--border);
+  margin-top: 3rem;
+}
+.concept-cell {
+  background: var(--deep); padding: 2rem 1.5rem; transition: background 0.3s;
+  opacity: 0; transform: translateY(16px);
+  transition: background 0.3s, opacity 0.5s ease, transform 0.5s ease;
+}
+.concept-cell.revealed     { opacity: 1; transform: translateY(0); }
+.concept-cell:hover        { background: var(--surface); }
+.concept-icon { font-family: var(--cjk); font-size: 2rem; margin-bottom: 1rem; display: block; }
+.concept-name { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--vermillion); margin-bottom: 0.6rem; }
+.concept-def  { font-size: 0.88rem; color: var(--paper-dim); line-height: 1.7; }
+.concept-timeline-link {
+  display: inline-block; font-family: var(--mono); font-size: 0.5rem;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal);
+  margin-top: 0.8rem; text-decoration: none; transition: color 0.2s;
+}
+.concept-timeline-link:hover { color: var(--paper); }
+.concept-timeline-link::after { content: ' →'; }
+
+/* Continue / reveal button */
+.theory-continue-wrap { margin-top: 2rem; text-align: center; }
+.theory-continue-btn {
+  background: none; border: 1px solid var(--border-strong);
+  color: var(--paper-dim); font-family: var(--mono); font-size: 0.6rem;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  padding: 0.8rem 2rem; cursor: crosshair; transition: all 0.2s;
+  min-height: 44px;
+}
+.theory-continue-btn:hover { background: var(--paper-ghost); color: var(--paper); border-color: var(--paper); }
+
+/* Meta question panel — appears after all concepts revealed */
+.theory-meta-panel {
+  margin-top: 3rem; padding: 2rem;
+  border: 1px solid var(--violet-soft); background: rgba(122,92,191,0.04);
+  opacity: 0; transition: opacity 0.6s ease;
+}
+.theory-meta-panel.visible { opacity: 1; }
+.theory-meta-q {
+  font-family: var(--cjk); font-size: 1.2rem; font-weight: 400;
+  margin-bottom: 1.2rem; color: var(--paper); font-style: italic;
+}
+.theory-meta-body {
+  font-size: 0.85rem; color: var(--paper-dim); line-height: 1.8; margin-bottom: 1.5rem;
+}
+.theory-meta-checks {
+  display: flex; gap: 1rem; flex-wrap: wrap;
+}
+.theory-check {
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.15em;
+  text-transform: uppercase; padding: 0.5rem 1rem; min-height: 44px;
+  display: flex; align-items: center; gap: 0.5rem;
+  text-decoration: none; transition: all 0.2s;
+}
+.theory-check.done      { border: 1px solid var(--gold); color: var(--gold); }
+.theory-check.done:hover { background: var(--gold-soft); }
+.theory-check.pending   { border: 1px solid var(--border); color: var(--paper-dim); }
+.theory-check::before   { content: '✓'; font-size: 0.8em; }
+
+/* ═══════════════════════════════════════════════════
+   AR PANEL — v2.7: expanded padding after audio removal
+   ═══════════════════════════════════════════════════ */
+#ar-panel { padding: 10rem 2rem; border-top: 1px solid var(--border); overflow: hidden; }
+.ar-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center;
+}
+/* Subtle simulation status caption below preview — R4 caution flag */
+.ar-sim-note {
+  font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--paper-dim); opacity: 0.55;
+  margin-top: 0.7rem;
+}
+.ar-preview {
+  aspect-ratio: 16/10; background: var(--surface);
+  border: 1px solid var(--border); position: relative;
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+}
+.ar-grid {
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: repeat(6,1fr); grid-template-rows: repeat(4,1fr);
+}
+.ar-cell {
+  border: 1px solid rgba(240,230,211,0.06);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--cjk); font-size: 1.2rem;
+  color: rgba(240,230,211,0.15); transition: all 0.4s;
+}
+.ar-cell.lit { background: rgba(191,41,41,0.12); color: rgba(191,41,41,0.7); border-color: rgba(191,41,41,0.2); }
+.ar-badge {
+  position: absolute; top: 1rem; left: 1rem;
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--teal); border: 1px solid var(--teal); padding: 0.3rem 0.7rem;
+}
+.ar-scan-line {
+  position: absolute; width: 100%; height: 2px;
+  background: linear-gradient(to right, transparent, rgba(58,140,140,0.6), transparent);
+  animation: scanDown 3s ease-in-out infinite; pointer-events: none;
+}
+@keyframes scanDown {
+  0%   { top: 0%;   opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+.ar-text h2        { font-family: var(--cjk); font-size: clamp(1.8rem,3.5vw,2.5rem); font-weight: 300; margin: 1rem 0 1.5rem; }
+.ar-text p         { font-size: 0.95rem; color: var(--paper-dim); line-height: 1.9; margin-bottom: 1rem; }
+.ar-feature        { display: flex; align-items: flex-start; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+.ar-feature-icon   { font-family: var(--cjk); font-size: 1.5rem; flex-shrink: 0; width: 40px; text-align: center; }
+.ar-feature-text   { font-size: 0.88rem; color: var(--paper-dim); line-height: 1.7; }
+.ar-feature-text strong { color: var(--paper); font-style: italic; }
+
+/* ═══════════════════════════════════════════════════
+   PROVENANCE
+   ═══════════════════════════════════════════════════ */
+#provenance  { padding: 6rem 2rem; border-top: 1px solid var(--border); }
+.prov-inner  { max-width: 900px; margin: 0 auto; }
+.prov-inner h2 { font-family: var(--cjk); font-size: clamp(1.8rem,3vw,2.5rem); font-weight: 300; margin: 1rem 0 2.5rem; }
+.prov-table  { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.prov-table th {
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--paper-dim); text-align: left;
+  padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-strong);
+}
+.prov-table td { padding: 1rem; border-bottom: 1px solid var(--border); color: var(--paper-dim); line-height: 1.5; vertical-align: top; }
+.prov-table td:first-child { color: var(--paper); font-family: var(--cjk); font-size: 0.95rem; }
+.prov-table tr:hover td { background: var(--paper-ghost2); }
+
+/* ═══════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════ */
+footer { padding: 4rem 2rem; border-top: 1px solid var(--border); background: var(--deep); }
+.footer-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr auto; gap: 3rem; align-items: end;
+}
+.footer-brand { font-family: var(--cjk); font-size: 1.5rem; font-weight: 300; margin-bottom: 0.8rem; }
+.footer-meta  { font-family: var(--mono); font-size: 0.58rem; color: var(--paper-dim); letter-spacing: 0.1em; line-height: 1.9; }
+.footer-right { text-align: right; }
+.footer-course { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.15em; color: var(--vermillion); text-transform: uppercase; margin-bottom: 0.5rem; }
+.footer-note  { font-family: var(--mono); font-size: 0.55rem; color: var(--paper-dim); line-height: 1.7; }
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .room-inner { grid-template-columns: 1fr; gap: 3rem; }
+}
+@media (max-width: 768px) {
+  #artist { grid-template-columns: 1fr; gap: 3rem; }
+  nav#nav { padding: 1rem 1.2rem; grid-template-columns: auto 1fr; }
+  .nav-links { gap: 1rem; justify-content: flex-end; }
+  .nav-right  { display: none; }
+  #nav-room-indicator { display: none; }
+  .ar-inner { grid-template-columns: 1fr; }
+  .glyph-options { grid-template-columns: 1fr 1fr; }
+  .char-matrix { grid-template-columns: repeat(6,1fr); }
+  #minimap { display: none; }
+}
+@media (max-width: 600px) {
+  .footer-inner { grid-template-columns: 1fr; }
+  .hero-ctas { flex-direction: column; align-items: center; }
+  .theory-meta-checks { flex-direction: column; }
+}
+
+/* ═══════════════════════════════════════════════════
+   ACCESSIBILITY
+   ═══════════════════════════════════════════════════ */
+:focus-visible {
+  outline: 2px solid var(--vermillion); outline-offset: 3px;
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div class="cursor-dot" id="cursor" aria-hidden="true"></div>
+<!-- Scroll progress -->
+<div id="progress-bar" role="progressbar" aria-label="Page reading progress"></div>
+
+<!-- ── Minimap ── -->
+<div id="minimap" role="navigation" aria-label="Section navigation">
+  <div class="mm-dot active" data-target="hero"            data-label="Hero"              tabindex="0" role="button" aria-label="Go to Hero"></div>
+  <div class="mm-dot"        data-target="artist"          data-label="Artist"            tabindex="0" role="button" aria-label="Go to Artist"></div>
+  <div class="mm-dot"        data-target="foyer"           data-label="Foyer"             tabindex="0" role="button" aria-label="Go to Foyer"></div>
+  <div class="mm-dot"        data-target="room-sky"        data-label="Room 01"           tabindex="0" role="button" aria-label="Go to Room 01"></div>
+  <div class="mm-dot"        data-target="room-english"    data-label="Room 02"           tabindex="0" role="button" aria-label="Go to Room 02"></div>
+  <div class="mm-dot"        data-target="room-square"     data-label="Room 03"           tabindex="0" role="button" aria-label="Go to Room 03"></div>
+  <div class="mm-dot"        data-target="glyph-tool"      data-label="Glyph Engine"      tabindex="0" role="button" aria-label="Go to Glyph Engine"></div>
+  <div class="mm-dot"        data-target="timeline"        data-label="Timeline"          tabindex="0" role="button" aria-label="Go to Timeline"></div>
+  <div class="mm-dot"        data-target="theory"          data-label="Theory"            tabindex="0" role="button" aria-label="Go to Theory"></div>
+  <div class="mm-dot"        data-target="ar-panel"        data-label="AR"                tabindex="0" role="button" aria-label="Go to AR Panel"></div>
+  <div class="mm-dot"        data-target="provenance"      data-label="Provenance"        tabindex="0" role="button" aria-label="Go to Provenance"></div>
+</div>
+
+<!-- ── Loader ── -->
+<div id="loader" role="status" aria-label="Loading gallery">
+  <div class="loader-chars" aria-hidden="true">書　天　地</div>
+  <div class="loader-bar" aria-hidden="true"><div class="loader-bar-fill"></div></div>
+  <div class="loader-sub">Epistemic Gallery — Xu Bing — HCI 510</div>
+</div>
+
+<!-- ── Nav ── -->
+<nav id="nav" aria-label="Main navigation">
+  <a href="#hero" class="nav-brand" aria-label="Xu Bing Gallery home">
+    <div class="nav-brand-mark" aria-hidden="true">書</div>
+    Xu Bing Gallery
+  </a>
+  <ul class="nav-links" role="list">
+    <li><a href="#foyer">Rooms</a></li>
+    <li><a href="#glyph-tool">Explore</a></li>
+    <li><a href="#timeline">Timeline</a></li>
+    <li><a href="#theory">Theory</a></li>
+    <li><a href="#ar-panel">AR</a></li>
+  </ul>
+  <!-- Right column: YOU ARE HERE — REQ-02 -->
+  <div class="nav-right">
+    <div id="nav-room-indicator" aria-live="polite" aria-label="Current room"></div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════
+     HERO — v2.5: Entry Rupture (REQ-01)
+     ════════════════════════════════════════ -->
+<section id="hero">
+  <div class="pseudo-bg" id="pseudo-bg" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow" aria-hidden="true">Epistemic Gallery System</div>
+    <h1 class="hero-title">
+      徐冰
+      <span>Xu Bing</span>
+    </h1>
+    <p class="hero-subtitle">
+      An interface that enacts reading failure — not one that merely explains it. The collapse of legibility here is not a limitation to be resolved, but the primary content delivered to every visitor.
+    </p>
+
+    <!-- UPGRADE #1: Pseudo-char entry button -->
+    <div class="hero-ctas">
+      <div class="entry-rupture-wrap">
+        <a href="#foyer" class="entry-btn-pseudo" id="entry-btn"
+           aria-label="Enter Gallery"
+           aria-describedby="entry-tooltip">
+          <span aria-hidden="true">囗</span>
+        </a>
+        <div class="entry-tooltip" id="entry-tooltip" role="tooltip">
+          [ reading: activation → suspension ]
+        </div>
+      </div>
+      <a href="#artist" class="hero-cta-secondary" aria-label="About the Artist">
+        About the Artist
+      </a>
+    </div>
+  </div>
+  <div class="hero-scroll-hint" aria-hidden="true">
+    <div class="scroll-line"></div>
+    scroll
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ARTIST
+     ════════════════════════════════════════ -->
+<section id="artist" aria-label="Artist profile">
+  <div class="reveal">
+    <div class="artist-portrait" aria-hidden="true">
+      <div class="artist-portrait-inner">書天地人文心道德</div>
+      <div class="portrait-year">b. 1955</div>
+      <div class="portrait-caption">Xu Bing / 徐冰 — Beijing, China → New York, USA</div>
+    </div>
+  </div>
+  <div class="artist-text reveal delay-1">
+    <div class="section-label">Artist Profile</div>
+    <h2>Master of the Unreadable Sign</h2>
+    <div class="authorship-tag">Curatorial Note</div>
+    <p>Xu Bing (b. 1955, Chongqing) occupies a singular position in contemporary art: he constructs systems of meaning that activate every mechanism of linguistic recognition — only to suspend resolution at the moment of comprehension.</p>
+    <p>Trained during the Cultural Revolution, sent to the countryside for reeducation, and eventually relocated to New York, Xu Bing's biography is itself a semiotic rupture — a life across incommensurable sign systems. His work does not illustrate this; it <em>enacts</em> it.</p>
+    <p>This gallery treats his output as an information system organized around four failure modes of reading — each room isolating a distinct mechanism through which legibility activates, then breaks.</p>
+    <div class="artist-stats" role="list">
+      <div class="stat" role="listitem">
+        <span class="stat-number">12</span>
+        <span class="stat-label">Major Works</span>
+      </div>
+      <div class="stat" role="listitem">
+        <span class="stat-number">38</span>
+        <span class="stat-label">Years Active</span>
+      </div>
+      <div class="stat" role="listitem">
+        <span class="stat-number">4</span>
+        <span class="stat-label">Epistemic Rooms</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     FOYER
+     ════════════════════════════════════════ -->
+<section id="foyer" aria-label="Navigation foyer">
+  <div class="foyer-inner">
+    <div class="foyer-header reveal">
+      <div class="section-label">Navigation Foyer</div>
+      <h2>Choose Your Reading Path</h2>
+      <p>Each room isolates a distinct failure mode of legibility. Parasitic friction has been removed — confusion that prevented access. Load-bearing friction remains — confusion that is the artwork.</p>
+    </div>
+    <div class="rooms-grid" role="list">
+      <a href="#room-sky" class="room-card reveal" data-room="sky" role="listitem" aria-label="Room 01: Book from the Sky, 1987 to 1991">
+        <div class="room-num" aria-hidden="true">Room 01 / 04</div>
+        <span class="room-glyph" aria-hidden="true">天</span>
+        <div class="room-title">Book from the Sky</div>
+        <div class="room-years">1987 — 1991</div>
+        <div class="room-desc">4,000 hand-carved pseudo-characters printed in classical format. Recognition fails not at the character level, but at the moment of expected meaning.</div>
+        <div class="room-arrow" aria-hidden="true">↗</div>
+      </a>
+      <a href="#room-english" class="room-card reveal delay-1" data-room="english" role="listitem" aria-label="Room 02: New English Calligraphy, 1994 to present">
+        <div class="room-num" aria-hidden="true">Room 02 / 04</div>
+        <span class="room-glyph" aria-hidden="true">英</span>
+        <div class="room-title">New English Calligraphy</div>
+        <div class="room-years">1994 — Present</div>
+        <div class="room-desc">Roman letters reconfigured into square-character forms. Neither Chinese readers nor English readers gain access — cross-cultural illegibility as design principle.</div>
+        <div class="room-arrow" aria-hidden="true">↗</div>
+      </a>
+      <a href="#room-square" class="room-card reveal delay-2" data-room="square" role="listitem" aria-label="Room 03: Square Word Calligraphy, 2002 to present">
+        <div class="room-num" aria-hidden="true">Room 03 / 04</div>
+        <span class="room-glyph" aria-hidden="true">方</span>
+        <div class="room-title">Square Word Calligraphy</div>
+        <div class="room-years">2002 — Present</div>
+        <div class="room-desc">English words written in the structural grammar of Chinese calligraphy. Visual universalism as interface paradox — familiar strokes, foreign resolution.</div>
+        <div class="room-arrow" aria-hidden="true">↗</div>
+      </a>
+      <a href="#theory" class="room-card reveal delay-3" data-room="games" role="listitem" aria-label="Room 04: Language Games, 2010s to present">
+        <div class="room-num" aria-hidden="true">Room 04 / 04</div>
+        <span class="room-glyph" aria-hidden="true">戲</span>
+        <div class="room-title">Language Games</div>
+        <div class="room-years">2010s — Present</div>
+        <div class="room-desc">Participatory misreading events, instructional drawings, and ecological text installations where meaning emerges from failed collective reading attempts.</div>
+        <div class="room-arrow" aria-hidden="true">↗</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ROOM 1 — Book from the Sky
+     ════════════════════════════════════════ -->
+<section class="gallery-room" id="room-sky" aria-label="Room 01: Book from the Sky">
+  <div class="room-bg-char" aria-hidden="true">天</div>
+  <div class="room-inner">
+    <div class="room-meta">
+      <!-- Breadcrumb REQ-02 -->
+      <div class="breadcrumb" role="navigation" aria-label="Location">
+        <a href="#foyer">Foyer</a>
+        <span class="breadcrumb-sep" aria-hidden="true">—</span>
+        <span class="breadcrumb-current">Room 01</span>
+      </div>
+      <a href="#foyer" class="back-btn" aria-label="Return to foyer">← Foyer</a>
+      <div class="section-label reveal">Room 01 — Recognition Failure · R1/R2</div>
+      <h2 class="reveal">Book from the Sky</h2>
+      <p class="tagline reveal">天書 / Tiānshū — "A Book from the Sky"</p>
+      <div class="authorship-tag reveal">Curatorial Note</div>
+      <p class="reveal">Between 1987 and 1991, Xu Bing hand-carved 4,000 unique pseudo-characters — glyphs that deploy every structural convention of classical Chinese script (radical composition, stroke order, spatial density) while remaining semantically void. No character maps to any lexeme in any known language.</p>
+      <p class="reveal delay-1">The phenomenological trap: readers fluent in Chinese experience the deepest frustration. The characters activate every layer of orthographic recognition — visual, structural, phonological — but semantic resolution never arrives. The reading apparatus is weaponized against itself.</p>
+      <p class="reveal delay-1">Printed across 600 volumes and suspended across gallery ceilings, the installation performs institutional legitimacy while transmitting nothing.</p>
+      <div class="reveal delay-2">
+        <span class="artwork-tag">Installation</span>
+        <span class="artwork-tag">Print</span>
+        <span class="artwork-tag">Woodblock</span>
+        <span class="artwork-tag">600 Volumes</span>
+      </div>
+    </div>
+    <div class="reveal delay-1">
+      <div class="artwork-card">
+        <div class="artwork-visual">
+          <div class="char-matrix" id="sky-matrix" aria-label="Interactive pseudo-character matrix" role="img"></div>
+        </div>
+        <div class="artwork-info">
+          <div class="artwork-title">Book from the Sky (天書) — Detail View</div>
+          <div class="artwork-meta-line">1987–1991 · Handmade books, woodblock print · 600 volumes · MoMA, Tate, Guggenheim</div>
+          <div class="artwork-desc">Interactive character matrix simulating the pseudo-glyph field. Each unit is structurally coherent, each semantically null.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ROOM 2 — New English Calligraphy
+     ════════════════════════════════════════ -->
+<section class="gallery-room" id="room-english" aria-label="Room 02: New English Calligraphy">
+  <div class="room-bg-char" style="color:rgba(201,163,86,0.02)" aria-hidden="true">英</div>
+  <div class="room-inner">
+    <div class="reveal delay-1">
+      <div class="artwork-card">
+        <div class="artwork-visual" style="background:var(--ink);">
+          <div style="font-family:var(--cjk);font-size:clamp(2rem,6vw,4.5rem);line-height:1.3;padding:2rem;text-align:center;color:var(--gold);opacity:0.8;">
+            <div style="font-size:0.45em;color:var(--paper-dim);font-family:var(--mono);letter-spacing:0.3em;margin-bottom:1rem;" aria-hidden="true">ENGLISH → CALLIGRAPHY</div>
+            <span aria-label="English letters rendered in Chinese calligraphic form">㊣㊥㊦㊧</span>
+            <div style="font-size:0.35em;margin-top:1rem;color:var(--paper-dim);font-family:var(--mono);" aria-hidden="true">[ reading path suspended ]</div>
+          </div>
+        </div>
+        <div class="artwork-info">
+          <div class="artwork-title">New English Calligraphy — Specimen Sheet</div>
+          <div class="artwork-meta-line">1994–present · Ink on xuan paper · Variable dimensions · Brooklyn Museum, V&amp;A</div>
+          <div class="artwork-desc">Roman letterforms restructured into square-character spatial grammar. The system is learnable and teachable — Xu Bing runs workshops — yet the trained reader inhabits a perpetual double-exclusion.</div>
+        </div>
+      </div>
+    </div>
+    <div class="room-meta">
+      <div class="breadcrumb" role="navigation" aria-label="Location">
+        <a href="#foyer">Foyer</a>
+        <span class="breadcrumb-sep" aria-hidden="true">—</span>
+        <span class="breadcrumb-current">Room 02</span>
+      </div>
+      <a href="#foyer" class="back-btn" aria-label="Return to foyer">← Foyer</a>
+      <div class="section-label gold reveal">Room 02 — Cross-Cultural Illegibility · R3</div>
+      <h2 class="reveal">New English Calligraphy</h2>
+      <p class="tagline gold reveal">英文书法 / A system that excludes every reader</p>
+      <div class="authorship-tag reveal">Curatorial Note</div>
+      <p class="reveal">In 1994, Xu Bing developed a complete system for rendering English text in the visual grammar of Chinese calligraphy. Roman letters are decomposed into strokes and recomposed as square-character units. The result is neither English nor Chinese.</p>
+      <p class="reveal delay-1">The failure mode is symmetric: Chinese readers see the structural conventions of their script but cannot resolve the Roman letterforms. English readers recognize something approaching their alphabet but cannot read the calligraphic composition. Neither community has legibility priority.</p>
+      <p class="reveal delay-2">HCI implication: interface legibility is not a property of an artifact but of the alignment between artifact grammar and reader competence. Xu Bing manufactures misalignment as content.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     ROOM 3 — Square Word Calligraphy
+     ════════════════════════════════════════ -->
+<section class="gallery-room" id="room-square" aria-label="Room 03: Square Word Calligraphy">
+  <div class="room-bg-char" style="color:rgba(58,140,140,0.02)" aria-hidden="true">方</div>
+  <div class="room-inner">
+    <div class="room-meta">
+      <div class="breadcrumb" role="navigation" aria-label="Location">
+        <a href="#foyer">Foyer</a>
+        <span class="breadcrumb-sep" aria-hidden="true">—</span>
+        <span class="breadcrumb-current">Room 03</span>
+      </div>
+      <a href="#foyer" class="back-btn" aria-label="Return to foyer">← Foyer</a>
+      <div class="section-label teal reveal">Room 03 — Visual Universalism · R5</div>
+      <h2 class="reveal">Square Word Calligraphy</h2>
+      <p class="tagline teal reveal">方块字书法 / The grammar of the visible</p>
+      <div class="authorship-tag reveal">Curatorial Note</div>
+      <p class="reveal">Square Word Calligraphy inverts the New English Calligraphy problem. Where that work trapped English inside Chinese structure, Square Word proposes a universal visual language derived from the spatial logic of character composition — without the cultural baggage of either system.</p>
+      <p class="reveal delay-1">Words like "TREE" or "MOUNTAIN" are rendered in stroke-order sequences that honor the pictographic origins of Chinese script while remaining decodable as English words. The cognitive rupture is gentler — but the epistemological claim is larger: that visual grammar can transcend linguistic enculturation.</p>
+      <p class="reveal delay-2">This claim fails productively. Viewers who have studied Chinese calligraphy read the work differently from those who have not. The "universal" turns out to be stratified by training.</p>
+      <div class="reveal delay-2">
+        <span class="artwork-tag">Calligraphy</span>
+        <span class="artwork-tag">Workshop-based</span>
+        <span class="artwork-tag">Pedagogical</span>
+      </div>
+    </div>
+    <div class="reveal delay-1">
+      <div class="artwork-card">
+        <div class="artwork-visual" style="background:var(--ink);min-height:280px;">
+          <div style="padding:2.5rem;text-align:center;width:100%;">
+            <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:0.3em;color:var(--teal);margin-bottom:2rem;" aria-hidden="true">SQUARE WORD — LIVE COMPOSITION</div>
+            <div id="square-word-display" style="font-family:var(--cjk);font-size:clamp(2.5rem,8vw,5rem);color:var(--paper);opacity:0.85;line-height:1.2;min-height:80px;transition:all 0.4s;" aria-live="polite" aria-label="Square word character display"></div>
+            <div style="margin-top:2rem;display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;" id="sw-controls" role="group" aria-label="Select a word to see its Square Word rendering"></div>
+          </div>
+        </div>
+        <div class="artwork-info">
+          <div class="artwork-title">Square Word Calligraphy — Interactive Demo</div>
+          <div class="artwork-meta-line">2002–present · Ink, workshop instruction manuals · Multiple collections</div>
+          <div class="artwork-desc">Select a word to see its Square Word rendering — English semantic content, Chinese calligraphic spatial logic.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     GLYPH ENGINE v2.5 — GUESS-FIRST (REQ-01)
+     ════════════════════════════════════════ -->
+<section id="glyph-tool" aria-label="Glyph Deconstruction Engine">
+  <div class="tool-inner">
+    <div class="section-label reveal" style="justify-content:center;">Interactive Instrument — R4</div>
+    <h2 class="reveal">Glyph Deconstruction Engine</h2>
+    <p class="tool-intro reveal">
+      A character appears. Classify it — before the system reveals its category.<br>
+      Some attempts will fail. That failure is not a malfunction. It is the content.
+    </p>
+
+    <div class="glyph-stage reveal" role="region" aria-label="Glyph classification challenge">
+      <div class="glyph-stage-meta">
+        <span class="glyph-score" id="glyph-score" aria-live="polite">Attempts: 0 · Correct: 0</span>
+        <span id="glyph-mode-label" aria-hidden="true">— / —</span>
+      </div>
+
+      <!-- The glyph -->
+      <div class="glyph-display" id="glyph-main" aria-label="Character to classify" role="img" aria-atomic="true"></div>
+
+      <!-- Reading status -->
+      <div class="glyph-status neutral" id="glyph-status" aria-live="assertive">
+        [ reading: awaiting attempt ]
+      </div>
+
+      <!-- Result description -->
+      <div class="glyph-result" id="glyph-result" aria-live="polite"></div>
+    </div>
+
+    <!-- Guess options — 4 unlabeled until guessed -->
+    <div class="glyph-options reveal delay-1" id="glyph-options"
+         role="group" aria-label="Classify this character — choose its type">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Next glyph -->
+    <div class="glyph-next-wrap reveal delay-2" id="glyph-next-wrap" style="display:none;">
+      <button class="glyph-btn danger" id="glyph-next-btn" aria-label="Show next glyph">
+        Next Glyph →
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     TIMELINE
+     ════════════════════════════════════════ -->
+<section id="timeline" aria-label="Timeline of Xu Bing's practice">
+  <div class="timeline-inner">
+    <div class="timeline-header reveal">
+      <div class="section-label">Temporal Path</div>
+      <h2>Linguistic Evolution, 1987–2025</h2>
+    </div>
+    <div class="timeline-track" role="list">
+      <div class="timeline-item" role="listitem">
+        <div class="timeline-dot" aria-hidden="true"></div>
+        <div class="timeline-year">1987</div>
+        <div class="timeline-event">Book from the Sky — First Installation</div>
+        <div class="timeline-detail">Beijing Exhibition Hall. Chinese authorities interpret the pseudo-characters as coded political dissent. The work is accused of "spiritual pollution" — a foundational misreading that Xu Bing incorporates into his subsequent methodology.</div>
+        <a href="#theory" class="timeline-theory-link" aria-label="Related concept: Cognitive Rupture">Cognitive Rupture</a>
+      </div>
+      <div class="timeline-item" role="listitem">
+        <div class="timeline-dot" aria-hidden="true"></div>
+        <div class="timeline-year">1990</div>
+        <div class="timeline-event">Relocation to New York</div>
+        <div class="timeline-detail">Xu Bing arrives in a second system of total illegibility. English is now his pseudo-character environment. Cross-cultural semiotic failure becomes biographical, not merely theoretical.</div>
+        <a href="#theory" class="timeline-theory-link" aria-label="Related concept: Semiotic Border">Semiotic Border</a>
+      </div>
+      <div class="timeline-item" role="listitem">
+        <div class="timeline-dot gold" aria-hidden="true"></div>
+        <div class="timeline-year">1994</div>
+        <div class="timeline-event">New English Calligraphy — System Formalized</div>
+        <div class="timeline-detail">Complete pedagogical system developed: stroke order manuals, practice sheets, workshop curriculum. The system is institutionally transmissible — meaning can be taught without being conveyed.</div>
+        <a href="#theory" class="timeline-theory-link" aria-label="Related concept: Pseudo-Legibility">Pseudo-Legibility</a>
+      </div>
+      <div class="timeline-item" role="listitem">
+        <div class="timeline-dot" aria-hidden="true"></div>
+        <div class="timeline-year">1999</div>
+        <div class="timeline-event">MacArthur Fellowship</div>
+        <div class="timeline-detail">Recognition within the English-language institutional apparatus — an irony Xu Bing notes: awarded for work that makes English unreadable.</div>
+      </div>
+      <div class="timeline-item" role="listitem">
+        <div class="timeline-dot teal" aria-hidden="true"></div>
+        <div class="timeline-year">2002</div>
+        <div class="timeline-event">Square Word Calligraphy — First Major Exhibition</div>
+        <div class="timeline-detail">Brooklyn Museum. The pedagogical workshops generate measurable data: English-only speakers achieve partial legibility after 3 hours of instruction. Chinese calligraphers read differently — faster structure, slower phonology.</div>
+        <a href="#theory" class="timeline-theory-link" aria-label="Related concept: Reading Failure">Reading Failure</a>
+      </div>
+      <div class="timeline-item" role="listitem">
+        <div class="timeline-dot" aria-hidden="true"></div>
+        <div class="timeline-year">2009</div>
+        <div class="timeline-event">Return to Beijing — CAFA Vice President</div>
+        <div class="timeline-detail">The artist who was accused of political subversion through pseudo-script returns to head China's premier art academy. The institutional frame has inverted; the work has not.</div>
+      </div>
+      <div class="timeline-item" role="listitem">
+        <div class="timeline-dot gold" aria-hidden="true"></div>
+        <div class="timeline-year">2014</div>
+        <div class="timeline-event">Book from the Ground — English-Language Publication</div>
+        <div class="timeline-detail">A novel written entirely in emoji and public pictograms. The inversion of Book from the Sky: a text designed to be readable across language barriers — for any reader familiar with contemporary pictographic conventions — because it exploits shared icon systems rather than subverting them.</div>
+      </div>
+      <div class="timeline-item" role="listitem">
+        <div class="timeline-dot teal" aria-hidden="true"></div>
+        <div class="timeline-year">2020</div>
+        <div class="timeline-event">Xu Bing Archives — Digital Preservation Initiative</div>
+        <div class="timeline-detail">Stroke-level documentation of all 4,000 Book from the Sky characters begins. OpenSeadragon deep-zoom integration enables stroke-order analysis for the first time in a public digital context.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     THEORY v2.5 — PROGRESSIVE REVEAL (REQ-03)
+     ════════════════════════════════════════ -->
+<section id="theory" aria-label="Theoretical framework">
+  <div class="theory-inner">
+    <div class="section-label reveal">Theoretical Frame</div>
+    <h2 class="reveal">Legibility vs. Enactment — The Core Design Tension</h2>
+
+    <div class="authorship-tag reveal">Artist's Statement</div>
+    <blockquote class="reveal">
+      "I am interested in the moment when a reader's confidence collapses — when the reading apparatus, fully engaged, finds nothing to hold. That gap is where art lives."
+      <cite>— Xu Bing, in conversation with Jerome Silbergeld, 2006</cite>
+    </blockquote>
+
+    <div class="authorship-tag reveal">Curatorial Note</div>
+    <p class="reveal">This gallery operationalizes Xu Bing's practice as a non-linear interpretive environment built around a single design distinction: parasitic friction — confusion that prevents access — has been removed at every layer. Load-bearing friction — confusion that IS the content — has been preserved, and in two moments structurally required.</p>
+    <p class="reveal delay-1">The entry button is unreadable by design. The Glyph Engine forces a classification attempt before the system's category is revealed. These interactions cannot be bypassed. The failure of reading is not incidental — it is the primary content delivered to the visitor.</p>
+
+    <!-- Concept grid — progressive reveal -->
+    <div class="concept-grid" id="concept-grid" aria-live="polite">
+      <div class="concept-cell" id="concept-0" data-concept="0">
+        <span class="concept-icon" aria-hidden="true">裂</span>
+        <div class="concept-name">Cognitive Rupture</div>
+        <div class="concept-def">The phenomenological gap between visual recognition and semantic resolution. Xu Bing manufactures this gap at scale — the reading apparatus fires but cannot complete.</div>
+        <a href="#timeline" class="concept-timeline-link" aria-label="See 1987 in timeline">See 1987 in timeline</a>
+      </div>
+      <div class="concept-cell" id="concept-1" data-concept="1">
+        <span class="concept-icon" aria-hidden="true">囗</span>
+        <div class="concept-name">Pseudo-Legibility</div>
+        <div class="concept-def">Signs that activate the recognition apparatus without completing the semantic chain. Every visual convention is present; meaning is structurally absent.</div>
+        <a href="#timeline" class="concept-timeline-link" aria-label="See 1994 in timeline">See 1994 in timeline</a>
+      </div>
+      <div class="concept-cell" id="concept-2" data-concept="2">
+        <span class="concept-icon" aria-hidden="true">讀</span>
+        <div class="concept-name">Reading Failure</div>
+        <div class="concept-def">Not a deficiency of the reader but a designed property of the artifact. Competence becomes the source of frustration — the more you know, the more acutely you fail.</div>
+        <a href="#timeline" class="concept-timeline-link" aria-label="See 2002 in timeline">See 2002 in timeline</a>
+      </div>
+      <div class="concept-cell" id="concept-3" data-concept="3">
+        <span class="concept-icon" aria-hidden="true">界</span>
+        <div class="concept-name">Semiotic Border</div>
+        <div class="concept-def">The threshold between sign systems where no competency provides passage. New English Calligraphy exists at this threshold permanently — illegibility as structural condition.</div>
+        <a href="#timeline" class="concept-timeline-link" aria-label="See 1990 in timeline">See 1990 in timeline</a>
+      </div>
+    </div>
+
+    <!-- Progressive reveal button -->
+    <div class="theory-continue-wrap" id="theory-continue-wrap">
+      <button class="theory-continue-btn" id="theory-continue-btn" aria-label="Reveal next concept">
+        Continue — reveal next concept →
+      </button>
+    </div>
+
+    <!-- Meta-question panel — appears after all concepts revealed -->
+    <div class="theory-meta-panel" id="theory-meta-panel" aria-live="polite">
+      <div class="theory-meta-q">
+        "This system is designed to produce one moment of reading failure per visit.<br>Did you encounter it?"
+      </div>
+      <div class="theory-meta-body">
+        The entry button was unreadable. The Glyph Engine required a classification attempt before the label appeared. Both moments were unavoidable. If you navigated around them, the interface did not succeed — and that is also data.
+      </div>
+      <div class="theory-meta-checks" role="list">
+        <a href="#hero" class="theory-check done" role="listitem" aria-label="Entry: unreadable button encountered">
+          Entry — Unreadable Button
+        </a>
+        <a href="#glyph-tool" class="theory-check done" role="listitem" aria-label="Glyph Engine: reading attempt with consequence">
+          Glyph Engine — Reading Attempt
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     AR PANEL — v2.7: audio removed; cautious simulation framing
+     ════════════════════════════════════════ -->
+<section id="ar-panel" aria-label="AR spatial integration">
+  <div class="ar-inner">
+    <div>
+      <div class="section-label reveal">Spatial / Augmented</div>
+      <div class="ar-preview reveal" aria-label="AR preview simulation" role="img">
+        <div class="ar-scan-line" aria-hidden="true"></div>
+        <div class="ar-grid" id="ar-grid" aria-hidden="true"></div>
+        <div class="ar-badge" aria-hidden="true">Prototype — Simulation</div>
+      </div>
+      <p class="ar-sim-note">Visual prototype only. Spatial AR requires hardware integration not present in this build.</p>
+    </div>
+    <div class="ar-text">
+      <div class="section-label reveal">Adobe Aero Integration</div>
+      <h2 class="reveal">Installation at Scale</h2>
+      <div class="authorship-tag reveal">Curatorial Note</div>
+      <p class="reveal">Physical galleries show the artifact. A spatial AR layer would show the mechanism — 600 pseudo-character scrolls reconstructed at full volumetric scale, extending overhead across the visitor's spatial field. This prototype represents the visual architecture of that planned integration.</p>
+      <p class="reveal delay-1">In a completed build, trigger markers within each room would activate the spatial overlay. Pseudo-character matrices would populate the ceiling plane; an audio layer of failed reading attempts would respond to gaze direction. Neither capability is present in this prototype.</p>
+      <div class="ar-feature reveal delay-1">
+        <div class="ar-feature-icon" aria-hidden="true">聽</div>
+        <div class="ar-feature-text">
+          <strong>Audio layer (planned):</strong> In Xu Bing's physical installations, visitors' attempts to read aloud are documented. The narrations are lexically empty — sounds without referents — but phonologically compelling. This layer is described here as design intent; it is not implemented in the current prototype.
+        </div>
+      </div>
+      <div class="ar-feature reveal delay-2">
+        <div class="ar-feature-icon" aria-hidden="true">深</div>
+        <div class="ar-feature-text">
+          <strong>Deep-zoom characters (planned):</strong> A future integration would allow stroke-level examination of pseudo-character construction — revealing the internal consistency of a script that maps to nothing. Not implemented in this prototype.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     PROVENANCE
+     ════════════════════════════════════════ -->
+<section id="provenance" aria-label="Artwork provenance and citations">
+  <div class="prov-inner">
+    <div class="section-label reveal">Documentation Layer</div>
+    <h2 class="reveal">Artwork Provenance &amp; Citation</h2>
+    <div class="reveal" style="overflow-x:auto;">
+      <table class="prov-table">
+        <thead>
+          <tr>
+            <th scope="col">Work</th>
+            <th scope="col">Date</th>
+            <th scope="col">Medium</th>
+            <th scope="col">Collection</th>
+            <th scope="col">Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Book from the Sky (天書)</td><td>1987–91</td><td>Handmade books, woodblock print</td><td>MoMA, Tate, Guggenheim Bilbao</td><td>Silbergeld &amp; Ching, 2006</td></tr>
+          <tr><td>New English Calligraphy</td><td>1994–</td><td>Ink on xuan paper</td><td>Brooklyn Museum, V&amp;A London</td><td>Erickson, 2001</td></tr>
+          <tr><td>Square Word Calligraphy</td><td>2002–</td><td>Mixed, workshop-based</td><td>Multiple private collections</td><td>Xu Bing Studio Archives</td></tr>
+          <tr><td>A Case Study of Transference</td><td>1993–94</td><td>Performance installation</td><td>American Fine Arts, NY</td><td>MoMA Online Collection</td></tr>
+          <tr><td>Book from the Ground (地书)</td><td>2003–14</td><td>Pictographic novel, digital</td><td>UCCA Beijing</td><td>Xu Bing, 2013</td></tr>
+          <tr><td>Phoenix (凤凰)</td><td>2008–10</td><td>Industrial debris, steel</td><td>Mass MoCA, St John the Divine</td><td>Pollack, 2014</td></tr>
+          <tr><td>Tobacco Project</td><td>1999–2011</td><td>Cigarettes, tobacco, text</td><td>Virginia Museum of Fine Arts</td><td>Virginia MOCA Archives</td></tr>
+          <tr><td>Background Story Series</td><td>2004–</td><td>Backlit landscape paintings</td><td>British Museum</td><td>British Museum Catalogue</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     FOOTER
+     ════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">徐冰 — Epistemic Gallery</div>
+      <div class="footer-meta">
+        An interface that enacts reading failure — not one that documents it.<br>
+        Entry rupture · Glyph Engine quiz · Progressive theory · Orientation system<br>
+        D1 Proposal · D2 Inquiry Plan · D3 Analysis Report
+      </div>
+    </div>
+    <div class="footer-right">
+      <div class="footer-course">HCI 510 — User Interface Design</div>
+      <div class="footer-note">
+        D1–D7 Final Deliverables · Spring 2026<br>
+        HTML / CSS / JS · Adobe Aero AR<br>
+        SUNY Oswego
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ════════════════════════════════════════
+     JAVASCRIPT — v2.7
+     Architecture: DATA layer → Module IIFEs
+     No inline event handlers.
+     Audio section removed. AR simulation framed cautiously.
+     ════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─── DATA LAYER ─────────────────────────────────────────── */
+const DATA = Object.freeze({
+
+  pseudoChars: Object.freeze([
+    '囗','囚','囤','囥','囦','囧','囨','囩','囪','囫','囬','园','囮','囯',
+    '困','囱','囲','図','围','囵','囶','囷','囸','囹','固','囻','囼','图',
+    '囿','圀','圁','圂','圃','圄','圅','圆','圇','圈','圉','圊','國','圌',
+    '圍','圎','圏','圐'
+  ]),
+
+  realChars:   Object.freeze(['人','山','水','火','木','金','土','日','月','風','雲','龍','鳳','虎','龜']),
+  hybridChars: Object.freeze(['囧','囨','囬','囯','図','囼','圀','圁','圂','圃']),
+  strokeChars: Object.freeze(['一','二','三','丨','丩','个','丫','丬']),
+
+  /** Glyph categories for quiz — label + description + bank key */
+  glyphCategories: Object.freeze([
+    {
+      key:   'pseudo',
+      label: 'Pseudo-Character',
+      desc:  'Structurally coherent, semantically void. Looks like a real character — maps to nothing.',
+      bank:  'pseudoChars',
+    },
+    {
+      key:   'real',
+      label: 'Real Character',
+      desc:  'A genuine Chinese character with semantic content. The reading apparatus completes its cycle.',
+      bank:  'realChars',
+    },
+    {
+      key:   'hybrid',
+      label: 'Hybrid Form',
+      desc:  'Ambiguous — activates multiple recognition pathways simultaneously. Neither fully real nor fully pseudo.',
+      bank:  'hybridChars',
+    },
+    {
+      key:   'stroke',
+      label: 'Stroke Layer',
+      desc:  'Sub-lexical component. A stroke or radical: the atoms from which characters are assembled.',
+      bank:  'strokeChars',
+    },
+  ]),
+
+  squareWords: Object.freeze({
+    TREE:   '木',
+    WATER:  '水',
+    FIRE:   '火',
+    EARTH:  '土',
+    SKY:    '天',
+    BOOK:   '書',
+    PERSON: '人',
+    MOUTH:  '口',
+  }),
+
+  sectionIds: Object.freeze([
+    'hero','artist','foyer','room-sky','room-english',
+    'room-square','glyph-tool','timeline','theory',
+    'ar-panel','provenance'
+  ]),
+
+  /** Room metadata for YOU ARE HERE indicator — P2: expanded to all 11 sections (R2.3)
+   *  Previously only 4 sections were tracked; users browsing 7 sections had no position signal.
+   *  Audio section removed in v2.7; count reduced from 12 to 11. */
+  roomMeta: Object.freeze({
+    'hero':             { label: 'Entrance',                          color: '#c8bba8' },
+    'artist':           { label: 'Artist Profile',                    color: '#c8bba8' },
+    'foyer':            { label: 'Navigation Foyer',                  color: '#c8bba8' },
+    'room-sky':         { label: 'Room 01 — Book from the Sky',       color: '#bf2929' },
+    'room-english':     { label: 'Room 02 — New English Calligraphy', color: '#c9a356' },
+    'room-square':      { label: 'Room 03 — Square Word Calligraphy', color: '#3a8c8c' },
+    'glyph-tool':       { label: 'Glyph Engine',                      color: '#7a5cbf' },
+    'timeline':         { label: 'Timeline',                          color: '#c8bba8' },
+    'theory':           { label: 'Theoretical Frame',                 color: '#c8bba8' },
+    'ar-panel':         { label: 'AR Integration',                    color: '#c8bba8' },
+    'provenance':       { label: 'Provenance',                        color: '#c8bba8' },
+  }),
+});
+
+/* ─── MODULE: Loader ──────────────────────────────────────── */
+(function LoaderModule() {
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loader').classList.add('hidden');
+    }, 3500);
+  });
+})();
+
+/* ─── MODULE: Cursor ──────────────────────────────────────── */
+(function CursorModule() {
+  const dot   = document.getElementById('cursor');
+  const entry = document.getElementById('entry-btn');
+
+  document.addEventListener('mousemove', (e) => {
+    dot.style.left = e.clientX + 'px';
+    dot.style.top  = e.clientY + 'px';
+  });
+
+  if (entry) {
+    entry.addEventListener('mouseenter', () => dot.classList.add('on-entry'));
+    entry.addEventListener('mouseleave', () => dot.classList.remove('on-entry'));
+  }
+})();
+
+/* ─── MODULE: PseudoBg ────────────────────────────────────── */
+(function PseudoBgModule() {
+  const container = document.getElementById('pseudo-bg');
+  const chars     = DATA.pseudoChars;
+  const frag      = document.createDocumentFragment();
+  for (let i = 0; i < 140; i++) {
+    const span = document.createElement('span');
+    span.className   = 'pseudo-char';
+    span.textContent = chars[Math.floor(Math.random() * chars.length)];
+    span.style.setProperty('--dur',   (3 + Math.random() * 5) + 's');
+    span.style.setProperty('--delay', (Math.random() * 6)     + 's');
+    frag.appendChild(span);
+  }
+  container.appendChild(frag);
+})();
+
+/* ─── MODULE: EntryRupture — UPGRADE #1 ─────────────────────
+   Shows pseudo-char as entry button.
+   After 3s, fades in tooltip "[reading: activation → suspension]"
+   ─────────────────────────────────────────────────────────── */
+(function EntryRuptureModule() {
+  const tooltip = document.getElementById('entry-tooltip');
+  const btn     = document.getElementById('entry-btn');
+  if (!tooltip || !btn) return;
+
+  // Reveal tooltip after 3 seconds on page
+  const timer = setTimeout(() => {
+    tooltip.classList.add('revealed');
+  }, 3000);
+
+  // Keyboard: Enter/Space fires navigation
+  btn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      const target = document.getElementById('foyer');
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  // Clean up timer on click
+  btn.addEventListener('click', () => clearTimeout(timer), { once: true });
+})();
+
+/* ─── MODULE: Navigation ──────────────────────────────────── */
+(function NavigationModule() {
+  const nav         = document.getElementById('nav');
+  const progressBar = document.getElementById('progress-bar');
+
+  function onScroll() {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+    const doc = document.documentElement;
+    const pct = (window.scrollY / (doc.scrollHeight - doc.clientHeight)) * 100;
+    progressBar.style.width = pct + '%';
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+})();
+
+/* ─── MODULE: YouAreHere — P2: expanded to all 11 sections ──
+   Previously tracked only 4 sections (room-sky, room-english,
+   room-square, glyph-tool). Users browsing Artist, Foyer,
+   Timeline, Theory, AR, and Provenance had no position signal.
+   Now all 11 sectionIds are tracked. Audio section removed v2.7.
+   (H1, Severity 3, R2.3)
+   ─────────────────────────────────────────────────────────── */
+(function YouAreHereModule() {
+  const indicator = document.getElementById('nav-room-indicator');
+  const roomIds   = Object.keys(DATA.roomMeta); // now all 12
+  let   current   = null;
+
+  const observer  = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const id   = entry.target.id;
+      const meta = DATA.roomMeta[id];
+      if (!meta) return;
+
+      if (entry.isIntersecting) {
+        if (current !== id) {
+          current = id;
+          indicator.textContent   = meta.label;
+          indicator.style.setProperty('border-color', meta.color);
+          indicator.style.setProperty('color', meta.color);
+          indicator.classList.add('visible');
+        }
+      } else {
+        if (current === id) {
+          const anyVisible = roomIds.some((rid) => {
+            const el = document.getElementById(rid);
+            if (!el) return false;
+            const r = el.getBoundingClientRect();
+            return r.top < window.innerHeight * 0.6 && r.bottom > 0;
+          });
+          if (!anyVisible) {
+            current = null;
+            indicator.classList.remove('visible');
+          }
+        }
+      }
+    });
+  }, { threshold: 0.15 });
+
+  roomIds.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+})();
+
+/* ─── MODULE: NavigationGuard — P1: H3 / Severity 4 / R2.4 ──
+   Fixes browser-back breaking the scroll-based exhibition.
+   D3: K-09 looped without realizing it; D-10 was "off-schedule";
+   J-09 "lost the thread." All three sessions disrupted.
+
+   Strategy:
+   1. Intercept all internal anchor clicks → pushState with section id.
+   2. On popstate with a valid xbSection state → scroll to that section.
+   3. On popstate with NO valid state (user exiting) → show a
+      "press back again to leave" notice and re-push current position.
+   4. On second consecutive exit attempt → allow departure (no trap).
+
+   Load-bearing friction NOT affected: the entry button's 3-second
+   tooltip delay and the Glyph Engine's unlabeled options are untouched.
+   ─────────────────────────────────────────────────────────── */
+(function NavigationGuardModule() {
+  // Replace initial history entry with a labelled state
+  const initialId = location.hash.slice(1) || 'hero';
+  history.replaceState({ xbSection: initialId }, '', '#' + initialId);
+
+  // Create the "press back again" notice element
+  const notice = document.createElement('div');
+  notice.id = 'nav-guard-notice';
+  notice.setAttribute('role', 'status');
+  notice.setAttribute('aria-live', 'polite');
+  notice.textContent = '[ press back again to leave the exhibition ]';
+  document.body.appendChild(notice);
+
+  let exitWarningActive = false;
+  let exitWarningTimer  = null;
+
+  function showNotice() {
+    notice.classList.add('visible');
+    clearTimeout(exitWarningTimer);
+    exitWarningTimer = setTimeout(() => {
+      notice.classList.remove('visible');
+      exitWarningActive = false;
+    }, 2600);
+  }
+
+  // Intercept all internal anchor clicks
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const targetId = a.getAttribute('href').slice(1);
+    if (!targetId) return;
+    const targetEl = document.getElementById(targetId);
+    if (!targetEl) return;
+    e.preventDefault();
+    exitWarningActive = false; // reset exit state on intentional navigation
+    history.pushState({ xbSection: targetId }, '', '#' + targetId);
+    targetEl.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // Guard popstate events
+  window.addEventListener('popstate', (e) => {
+    const section = e.state?.xbSection;
+
+    if (section && document.getElementById(section)) {
+      // Valid in-exhibition navigation — scroll there
+      exitWarningActive = false;
+      document.getElementById(section).scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+
+    // No valid exhibition state — user pressing back to leave
+    if (exitWarningActive) {
+      // Second press: allow exit; do not re-push
+      exitWarningActive = false;
+      return;
+    }
+
+    // First press: warn and re-push current scroll position
+    exitWarningActive = true;
+    showNotice();
+
+    const currentSection = DATA.sectionIds.find((id) => {
+      const el = document.getElementById(id);
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      return r.top < window.innerHeight * 0.55 && r.bottom > 0;
+    }) || 'hero';
+
+    history.pushState({ xbSection: currentSection }, '', '#' + currentSection);
+  });
+})();
+
+/* ─── MODULE: Minimap ─────────────────────────────────────── */
+(function MinimapModule() {
+  const dots   = Array.from(document.querySelectorAll('.mm-dot'));
+  const ids    = DATA.sectionIds;
+  const halfVP = () => window.innerHeight / 2;
+
+  function getActiveIdx() {
+    let active = 0;
+    ids.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top < halfVP()) active = i;
+    });
+    return active;
+  }
+
+  function update() {
+    const active = getActiveIdx();
+    dots.forEach((d, i) => d.classList.toggle('active', i === active));
+  }
+
+  dots.forEach((dot, i) => {
+    const activate = () => {
+      const target = document.getElementById(ids[i]);
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    };
+    dot.addEventListener('click',   activate);
+    dot.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); }
+    });
+  });
+
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+
+/* ─── MODULE: Reveal ──────────────────────────────────────── */
+(function RevealModule() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal, .timeline-item').forEach((el) => obs.observe(el));
+})();
+
+/* ─── MODULE: CharMatrix ──────────────────────────────────── */
+(function CharMatrixModule() {
+  const container = document.getElementById('sky-matrix');
+  if (!container) return;
+  const chars = DATA.pseudoChars;
+  const frag  = document.createDocumentFragment();
+  for (let i = 0; i < 64; i++) {
+    const span = document.createElement('span');
+    span.textContent = chars[Math.floor(Math.random() * chars.length)];
+    if (Math.random() < 0.50) span.classList.add('dim');
+    if (Math.random() < 0.05) span.classList.add('highlight');
+    frag.appendChild(span);
+  }
+  container.appendChild(frag);
+
+  setInterval(() => {
+    container.querySelectorAll('span').forEach((s) => {
+      if (Math.random() < 0.05) {
+        s.textContent = chars[Math.floor(Math.random() * chars.length)];
+        s.className   = Math.random() < 0.05 ? 'highlight' : (Math.random() < 0.5 ? 'dim' : '');
+      }
+    });
+  }, 800);
+})();
+
+/* ─── MODULE: SquareWord ──────────────────────────────────── */
+(function SquareWordModule() {
+  const display  = document.getElementById('square-word-display');
+  const controls = document.getElementById('sw-controls');
+  if (!display || !controls) return;
+  const words = DATA.squareWords;
+
+  function select(word) {
+    display.textContent = words[word];
+    display.setAttribute('aria-label', `Square Word rendering of ${word}: ${words[word]}`);
+    display.style.color = 'var(--gold)';
+    setTimeout(() => { display.style.color = 'var(--paper)'; }, 600);
+    controls.querySelectorAll('.glyph-btn').forEach((b) => b.classList.remove('active'));
+    controls.querySelector(`[data-word="${word}"]`)?.classList.add('active');
+  }
+
+  const frag = document.createDocumentFragment();
+  Object.keys(words).forEach((word) => {
+    const btn = document.createElement('button');
+    btn.className    = 'glyph-btn';
+    btn.dataset.word = word;
+    btn.textContent  = word;
+    btn.setAttribute('aria-label', `Show Square Word rendering of ${word}`);
+    frag.appendChild(btn);
+  });
+  controls.appendChild(frag);
+
+  controls.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-word]');
+    if (btn) select(btn.dataset.word);
+  });
+  controls.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const btn = e.target.closest('[data-word]');
+      if (btn) { e.preventDefault(); select(btn.dataset.word); }
+    }
+  });
+
+  const first = Object.keys(words)[0];
+  display.textContent = words[first];
+  display.setAttribute('aria-label', `Square Word rendering of ${first}: ${words[first]}`);
+  controls.querySelector(`[data-word="${first}"]`)?.classList.add('active');
+})();
+
+/* ─── MODULE: GlyphQuiz — UPGRADE #2 ────────────────────────
+   Flow: Show glyph → 4 unlabeled options → user guesses →
+         correct (gold pulse) or wrong (shake) → label reveals →
+         result description → Next Glyph
+   Maps to REQ-01: Interaction Affordance ↑
+   ─────────────────────────────────────────────────────────── */
+(function GlyphQuizModule() {
+  const glyphEl    = document.getElementById('glyph-main');
+  const statusEl   = document.getElementById('glyph-status');
+  const resultEl   = document.getElementById('glyph-result');
+  const optionsEl  = document.getElementById('glyph-options');
+  const nextWrap   = document.getElementById('glyph-next-wrap');
+  const nextBtn    = document.getElementById('glyph-next-btn');
+  const scoreEl    = document.getElementById('glyph-score');
+  const modeLabelEl = document.getElementById('glyph-mode-label');
+  if (!glyphEl || !optionsEl) return;
+
+  const cats       = DATA.glyphCategories;
+  let   attempts   = 0;
+  let   correct    = 0;
+  let   answered   = false;
+  let   currentCat = null;
+  let   currentChar = '';
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function pickRandom() {
+    const cat  = cats[Math.floor(Math.random() * cats.length)];
+    const bank = DATA[cat.bank];
+    return { cat, char: bank[Math.floor(Math.random() * bank.length)] };
+  }
+
+  function updateScore() {
+    scoreEl.textContent = `Attempts: ${attempts} · Correct: ${correct}`;
+  }
+
+  function loadGlyph() {
+    answered = false;
+    const pick = pickRandom();
+    currentCat  = pick.cat;
+    currentChar = pick.char;
+
+    // Animate out + in
+    glyphEl.style.opacity   = '0';
+    glyphEl.style.transform = 'scale(0.7)';
+    glyphEl.className       = 'glyph-display';
+
+    setTimeout(() => {
+      glyphEl.textContent     = currentChar;
+      glyphEl.style.opacity   = '1';
+      glyphEl.style.transform = 'scale(1)';
+      glyphEl.style.color     = 'var(--paper)';
+      glyphEl.setAttribute('aria-label', `Character to classify: ${currentChar}`);
+    }, 200);
+
+    // Status
+    statusEl.textContent  = '[ reading: awaiting attempt ]';
+    statusEl.className    = 'glyph-status neutral';
+    modeLabelEl.textContent = '— / —';
+
+    // Result hidden
+    resultEl.textContent = '';
+    resultEl.classList.remove('visible');
+
+    // Hide next btn
+    nextWrap.style.display = 'none';
+
+    // Build unlabeled option buttons
+    optionsEl.innerHTML = '';
+    const shuffled      = shuffle(cats);
+    const frag          = document.createDocumentFragment();
+
+    shuffled.forEach((cat) => {
+      const btn = document.createElement('button');
+      btn.className           = 'glyph-option-btn';
+      btn.dataset.catKey      = cat.key;
+      btn.textContent         = '— — — —';  // No label until guessed
+      btn.setAttribute('aria-label', `Option: unknown. Make your guess.`);
+      frag.appendChild(btn);
+    });
+    optionsEl.appendChild(frag);
+  }
+
+  function onGuess(chosenKey, clickedBtn) {
+    if (answered) return;
+    answered = true;
+    attempts++;
+
+    const isCorrect = (chosenKey === currentCat.key);
+    if (isCorrect) correct++;
+    updateScore();
+
+    // Reveal all button labels
+    optionsEl.querySelectorAll('.glyph-option-btn').forEach((btn) => {
+      const key  = btn.dataset.catKey;
+      const meta = cats.find((c) => c.key === key);
+      btn.textContent = meta ? meta.label : key;
+      btn.setAttribute('aria-label', meta ? meta.label : key);
+      btn.disabled    = true;
+      btn.classList.add('reveal');
+    });
+
+    if (isCorrect) {
+      clickedBtn.classList.remove('reveal');
+      clickedBtn.classList.add('correct');
+      glyphEl.classList.add('correct');
+      statusEl.textContent = '[ reading: attempt → resolution ]';
+      statusEl.className   = 'glyph-status success';
+      modeLabelEl.textContent = currentCat.label.toUpperCase();
+    } else {
+      clickedBtn.classList.remove('reveal');
+      clickedBtn.classList.add('wrong');
+      // Highlight the correct answer
+      optionsEl.querySelectorAll('.glyph-option-btn').forEach((btn) => {
+        if (btn.dataset.catKey === currentCat.key) btn.classList.add('correct');
+      });
+      glyphEl.classList.add('shake');
+      setTimeout(() => glyphEl.classList.remove('shake'), 600);
+      statusEl.textContent = '[ reading: attempt → failure ]';
+      statusEl.className   = 'glyph-status failure';
+      modeLabelEl.textContent = currentCat.label.toUpperCase();
+    }
+
+    // Show result description
+    resultEl.innerHTML = `<strong>${currentCat.label}:</strong> ${currentCat.desc}`;
+    setTimeout(() => resultEl.classList.add('visible'), 100);
+
+    // Show next btn
+    setTimeout(() => { nextWrap.style.display = 'block'; }, 400);
+  }
+
+  // Event delegation
+  optionsEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.glyph-option-btn');
+    if (btn && !btn.disabled) onGuess(btn.dataset.catKey, btn);
+  });
+  optionsEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const btn = e.target.closest('.glyph-option-btn');
+      if (btn && !btn.disabled) { e.preventDefault(); onGuess(btn.dataset.catKey, btn); }
+    }
+  });
+
+  nextBtn?.addEventListener('click', loadGlyph);
+
+  loadGlyph();
+})();
+
+/* ─── MODULE: TheoryReveal — UPGRADE #3 ─────────────────────
+   Progressive concept reveal: one cell at a time.
+   After all revealed, show meta-question panel.
+   Maps to REQ-03: Depth Progression ↑
+   ─────────────────────────────────────────────────────────── */
+(function TheoryRevealModule() {
+  const cells       = Array.from(document.querySelectorAll('.concept-cell'));
+  const continueBtn = document.getElementById('theory-continue-btn');
+  const continueWrap = document.getElementById('theory-continue-wrap');
+  const metaPanel   = document.getElementById('theory-meta-panel');
+  if (!cells.length || !continueBtn) return;
+
+  let revealed = 0;
+
+  function revealNext() {
+    if (revealed < cells.length) {
+      cells[revealed].classList.add('revealed');
+      revealed++;
+    }
+    if (revealed >= cells.length) {
+      // All concepts revealed
+      continueBtn.textContent = 'All concepts revealed';
+      continueBtn.disabled    = true;
+      continueBtn.setAttribute('aria-disabled', 'true');
+      // Show meta-question panel
+      setTimeout(() => { metaPanel.classList.add('visible'); }, 500);
+    } else {
+      continueBtn.textContent = `Continue — reveal next concept → (${revealed}/${cells.length})`;
+    }
+  }
+
+  continueBtn.addEventListener('click', revealNext);
+  continueBtn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); revealNext(); }
+  });
+
+  // Reveal first concept immediately (Cognitive Rupture) on scroll into view
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting && revealed === 0) { revealNext(); obs.disconnect(); }
+    });
+  }, { threshold: 0.3 });
+  const grid = document.getElementById('concept-grid');
+  if (grid) obs.observe(grid);
+
+  // Update button text initially
+  continueBtn.textContent = `Continue — reveal next concept → (1/${cells.length})`;
+})();
+
+/* ─── MODULE: ArGrid ──────────────────────────────────────── */
+(function ArGridModule() {
+  const grid  = document.getElementById('ar-grid');
+  if (!grid) return;
+  const chars = DATA.pseudoChars;
+  const frag  = document.createDocumentFragment();
+  for (let i = 0; i < 24; i++) {
+    const cell = document.createElement('div');
+    cell.className   = 'ar-cell';
+    cell.textContent = chars[Math.floor(Math.random() * chars.length)];
+    frag.appendChild(cell);
+  }
+  grid.appendChild(frag);
+
+  setInterval(() => {
+    grid.querySelectorAll('.ar-cell').forEach((c) => {
+      const lit = Math.random() < 0.15;
+      c.classList.toggle('lit', lit);
+      if (lit) c.textContent = chars[Math.floor(Math.random() * chars.length)];
+    });
+  }, 1200);
+})();
+
+</script>
+</body>
+</html>

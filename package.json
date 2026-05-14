@@ -1,7 +1,7 @@
 {
   "name": "xu-bing-epistemic-gallery",
   "version": "2.7.1",
-  "description": "Xu Bing: Epistemic Gallery — HCI 510",
+  "description": "Xu Bing: Epistemic Gallery ",
   "scripts": {
     "dev":     "vite",
     "build":   "vite build",

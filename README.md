@@ -1,6 +1,5 @@
 # Xu Bing: Epistemic Gallery — v2.7.1
 
-HCI 510 · Spring 2026 · SUNY Oswego
 
 ## Project structure
 

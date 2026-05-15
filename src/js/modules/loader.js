@@ -2,6 +2,6 @@ export function init() {
   window.addEventListener('load', () => {
     setTimeout(() => {
       document.getElementById('loader').classList.add('hidden');
-    }, 2000);
+    }, 3000);
   });
 }

@@ -5,7 +5,7 @@ export function init() {
 
   const timer = setTimeout(() => {
     tooltip.classList.add('revealed');
-  }, 5000);
+  }, 6000);
 
   btn.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {

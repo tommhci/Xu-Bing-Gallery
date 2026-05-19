@@ -77,19 +77,4 @@ The `square-word.js` module reads this dynamically.
 Each module in `src/js/modules/` exports a single `init()` function.
 Import order in `main.js` is the initialization order — change if needed.
 
-## Design constraints (do not change)
 
-The following are load-bearing friction — intentional heuristic violations
-that are the conceptual content of the project:
-
-- **Entry button (囗)**: unlabeled pseudo-character. The 3-second tooltip
-  delay is required. Do not label the button on load.
-- **Glyph Engine options**: four buttons display `— — — —` until the user
-  commits a guess. Labels must not appear before the attempt.
-
-The following are access-layer fixes that must be preserved:
-
-- Breadcrumb font-size: `0.72rem` minimum (was `0.55rem` in v2.5).
-- YOU ARE HERE: all 11 sections tracked in `DATA.roomMeta`.
-- Navigation guard: popstate intercept in `navigation-guard.js`.
-- Authorship tags: `.authorship-tag` elements in Theory and Artist sections.

@@ -49,7 +49,7 @@
   width: 0%; transition: width 0.1s;
 }
 
-/* Contextual Back Link for D5 H7 Improvement */
+/* Contextual return link */
 .context-back-link-wrap {
   display: flex;
   align-items: center;
@@ -275,7 +275,7 @@ blockquote cite {
 }
 .timeline-theory-link:hover { background: var(--violet-soft); }
 
-/* ── Authorship tag — R3.1 ── */
+/* ── Authorship tag ── */
 .authorship-tag {
   display: inline-block;
   font-family: var(--mono); font-size: 0.5rem;
@@ -286,7 +286,7 @@ blockquote cite {
   margin-bottom: 0.9rem; margin-top: 0.2rem;
 }
 
-/* ── Navigation guard notice — R2.4 ── */
+/* ── Navigation guard notice ── */
 #nav-guard-notice {
   position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
   background: var(--deep); border: 1px solid var(--border-strong);
@@ -405,5 +405,4 @@ footer { padding: 4rem 2rem; border-top: 1px solid var(--border); background: va
 .footer-brand  { font-family: var(--cjk); font-size: 1.5rem; font-weight: 300; margin-bottom: 0.8rem; }
 .footer-meta   { font-family: var(--mono); font-size: 0.58rem; color: var(--paper-dim); letter-spacing: 0.1em; line-height: 1.9; }
 .footer-right  { text-align: right; }
-.footer-course { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.15em; color: var(--vermillion); text-transform: uppercase; margin-bottom: 0.5rem; }
 .footer-note   { font-family: var(--mono); font-size: 0.55rem; color: var(--paper-dim); line-height: 1.7; }

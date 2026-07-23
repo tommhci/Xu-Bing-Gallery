@@ -17,7 +17,7 @@ export function init() {
   let answered   = false;
   let currentCat = null;
 
-  /* ── D5 H8 fix: track actual interaction state ── */
+  /* Track whether the visitor has performed the reading attempt. */
   let glyphAttempted = false;
 
   function shuffle(arr) {
@@ -71,7 +71,7 @@ export function init() {
     resultEl.classList.remove('visible');
     nextWrap.style.display  = 'none';
 
-    /* H5 race-condition fix: disable pointer events until options rendered */
+    /* Disable pointer events until the new option set is fully rendered. */
     optionsEl.style.pointerEvents = 'none';
     optionsEl.innerHTML = '';
     const shuffled = shuffle(cats);

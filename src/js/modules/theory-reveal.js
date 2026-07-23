@@ -12,13 +12,11 @@ export function init() {
       revealed++;
     }
     if (revealed >= cells.length) {
-      /* D5 H1 Severity-1 fix: unambiguous completion label */
       continueBtn.textContent = 'All concepts revealed';
       continueBtn.disabled    = true;
       continueBtn.setAttribute('aria-disabled', 'true');
       setTimeout(() => { metaPanel.classList.add('visible'); }, 500);
     } else {
-      /* D5 H1 fix: "Revealed: N of 4" is unambiguous vs old "(N/4)" */
       continueBtn.textContent = `Revealed: ${revealed} of ${cells.length} — continue →`;
     }
   }

@@ -162,5 +162,4 @@ xu-bing-gallery/
 ## References Checked
 
 - Xu Bing Studio, [artwork index and artist materials](https://www.xubing.com/en/work), checked July 23, 2026.
-- The Metropolitan Museum of Art, [*An Introduction to Square Word Calligraphy*](https://www.metmuseum.org/exhibitions/view?exhibitionId=%7B2cca0d85-6307-4ac7-9674-c4e4f675c08e%7D&fe=1&oid=73325), checked July 23, 2026.
 - GitHub Docs, [custom GitHub Pages workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages), checked July 23, 2026.

@@ -4,6 +4,8 @@ An interactive exhibition prototype about **reading, ambiguity, and intentional 
 
 **[Try the live prototype](https://tommhci.github.io/Xu-Bing-Gallery/)** · **[Read the design case study](CASE_STUDY.md)**
 
+![The gallery's opening view: a dark typographic layout with the title 徐冰 / Xu Bing, a top navigation bar (Rooms, Explore, Timeline, Theory, AR), and a faint grid of repeated 囗-family glyphs behind the text.](media/gallery.png)
+
 **Design question:** How can an interface preserve the productive uncertainty of reading Xu Bing's work without making basic navigation feel broken?
 
 **What informed the redesign:** Three moderated, formative think-aloud sessions identified entry and wayfinding problems. Those observations informed revised navigation and recovery paths; **no post-revision audience validation is claimed**.

@@ -1,5 +1,7 @@
 # Xu Bing: Epistemic Gallery — Design Case Study
 
+*Independent educational project. Not affiliated with or endorsed by Xu Bing Studio or any museum. Artwork and source materials remain the property of their respective rightsholders.*
+
 ## One-Line Thesis
 
 This is not a website about Xu Bing. It is an interface that borrows Xu Bing's central problem: the visitor recognizes a sign, reaches for meaning, and discovers that recognition is not the same as reading.
@@ -115,13 +117,47 @@ Professional boundary:
 
 That boundary should stay visible, but not apologetic.
 
+## Method
+
+Three in-person moderated think-aloud sessions, 1 May 2026.
+
+- **Participants:** 3, recruited for no prior exposure to Xu Bing or to Chinese writing systems
+- **Session length:** 34–38 minutes
+- **Tasks:** start the visit; explore while narrating where you think you are; connect one artwork, one historical item, and one theory concept within a 12-minute window
+- **Data:** real-time moderator notes — click targets, hesitation, navigation outcomes, reported confusion
+- **Analysis:** 31 observation notes, grouped by bottom-up affinity clustering into four themes: entry logic, interaction affordance, orientation stability, interpretive depth
+
+Sessions were not audio- or screen-recorded. Findings are directional and are not statistically generalisable.
+
+### What the sessions showed
+
+| Observation | Result |
+|---|---|
+| Treated the dominant central title glyph as the starting action, though it was not interactive | 3 of 3 |
+| Did not find the navigation within the first five minutes; discovery came later in each session | 3 of 3 |
+| Had back-navigation disrupt the session | 3 of 3 |
+| Reached at least one artwork → history connection | 3 of 3 |
+| Completed artwork → history → theory inside the task window | 0 of 3 |
+
+Participants who reached the theory content sometimes withheld engagement because the source category of that interpretation was unclear. That was an observed pattern, not a counted measure.
+
+## External heuristic evaluation
+
+An external UX designer spent approximately 70 minutes completing the three tasks and reviewing the prototype against Nielsen's usability heuristics. The highest-priority findings were:
+
+1. Back-navigation scoping — Severity 4
+2. Current-location coverage — Severity 3
+3. Authorship attribution — Severity 3
+
+The review also separated two things the project had been treating as one: the entry glyph's illegibility was intentional, and the absence of any affordance signal was not. The same element can carry meaningful difficulty and still contain a repairable usability failure.
+
 ## Evidence
 
 Evidence available:
 
 - A working browser prototype.
-- Three moderated think-aloud sessions.
-- Observation notes grouped into entry logic, affordance, orientation, and interpretive depth.
+- Three moderated think-aloud sessions (34–38 minutes each), with 31 observations clustered into four themes.
+- One external heuristic evaluation against Nielsen's heuristics, with three severity-rated findings.
 - A documented redesign from navigation failure toward orientation support.
 - A functioning deployment pipeline through GitHub Pages.
 

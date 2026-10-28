@@ -173,3 +173,9 @@ xu-bing-gallery/
 
 - Xu Bing Studio, [artwork index and artist materials](https://www.xubing.com/en/work), checked July 23, 2026.
 - GitHub Docs, [custom GitHub Pages workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages), checked July 23, 2026.
+
+## Project history and license
+
+Commit history spans two accounts: work from May to July 2026 is authored under an earlier account (`leafeng318`), later work under `tommhci`.
+
+The code and the original written content of this repository are released under the MIT license (see `LICENSE`). Referenced artworks, quotations, and third-party sources remain the property of their respective rightsholders and are not covered by that license.

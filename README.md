@@ -1,10 +1,20 @@
 # Xu Bing: Epistemic Gallery
 
-**An interface that makes reading fail, and makes that failure feel designed.**
+An interactive exhibition prototype about **reading, ambiguity, and intentional friction**.
 
-Live prototype: https://tommhci.github.io/Xu-Bing-Gallery/
+**[Try the live prototype](https://tommhci.github.io/Xu-Bing-Gallery/)** · **[Read the design case study](CASE_STUDY.md)**
 
-Design case study: [CASE_STUDY.md](./CASE_STUDY.md)
+![The gallery's opening view: a dark typographic layout with the title 徐冰 / Xu Bing, a top navigation bar (Rooms, Explore, Timeline, Theory, AR), and a faint grid of repeated 囗-family glyphs behind the text.](media/gallery.png)
+
+**Design question:** How can an interface preserve the productive uncertainty of reading Xu Bing's work without making basic navigation feel broken?
+
+**What informed the redesign:** Three in-person moderated think-aloud sessions (34–38 minutes each) produced 31 observation notes across four themes, and an external UX designer's heuristic evaluation independently rated back-navigation as its highest-severity issue. Those findings drove the revised navigation and recovery paths. **No post-revision validation is claimed.**
+
+**Explore:** The ambiguous entry, glyph-classification interaction, and persistent wayfinding. Spatial AR is a concept extension, not a deployed feature.
+
+*Independent educational project. Not affiliated with or endorsed by Xu Bing Studio or any museum.*
+
+---
 
 ## Why This Exists
 

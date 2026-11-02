@@ -67,7 +67,7 @@ section { position: relative; }
 .section-label.gold::before  { background: var(--gold);   }
 .section-label.teal   { color: var(--teal);   }
 .section-label.teal::before  { background: var(--teal);   }
-.section-label.violet { color: var(--violet); }
+.section-label.violet { color: var(--violet-text); }
 .section-label.violet::before { background: var(--violet); }
 
 /* ── Accessibility ── */

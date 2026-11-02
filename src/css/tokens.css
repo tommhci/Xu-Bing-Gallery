@@ -23,6 +23,7 @@
   --teal-soft:       rgba(58,140,140,0.15);
   --violet:          #7a5cbf;
   --violet-soft:     rgba(122,92,191,0.15);
+  --violet-text:     #886ec6; /* --violet #7a5cbf is 3.64-3.94:1 on the dark grounds; text needs 4.5:1. Hue kept, lightness raised */
 
   /* Room accent system */
   --room-1: #bf2929;

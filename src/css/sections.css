@@ -127,7 +127,8 @@
 .room-card:hover .room-glyph { opacity: 1; transform: scale(1.05); }
 .room-title { font-family: var(--cjk); font-size: 1.15rem; font-weight: 400; margin-bottom: 0.6rem; }
 .room-years { font-family: var(--mono); font-size: 0.6rem; color: var(--card-accent); letter-spacing: 0.1em; margin-bottom: 1rem; }
-.room-card[data-room="sky"] .room-years { color: var(--vermillion-text); } /* --room-1 #bf2929 is 3.41:1 on --ink; text needs 4.5:1 */
+.room-card[data-room="sky"] .room-years { color: var(--vermillion-text); }
+.room-card[data-room="games"] .room-years { color: var(--violet-text); } /* --room-4 #7a5cbf is 3.94:1 on --ink; text needs 4.5:1 */ /* --room-1 #bf2929 is 3.41:1 on --ink; text needs 4.5:1 */
 .room-desc  { font-size: 0.88rem; color: var(--paper-dim); line-height: 1.7; position: relative; z-index: 1; }
 .room-arrow { position: absolute; bottom: 1.5rem; right: 1.5rem; font-family: var(--mono); font-size: 0.7rem; color: var(--paper-dim); transition: color 0.3s, transform 0.3s; z-index: 1; }
 .room-card:hover .room-arrow { color: var(--paper); transform: translate(3px,-3px); }

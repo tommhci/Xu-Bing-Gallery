@@ -16,8 +16,6 @@
 <!-- Custom cursor -->
 <div class="cursor-dot" id="cursor" aria-hidden="true"></div>
 
-<!-- Scroll progress -->
-<div id="progress-bar" role="progressbar" aria-label="Page reading progress"></div>
 
 <!-- ── Minimap ── -->
 <div id="minimap" role="navigation" aria-label="Section navigation">
@@ -43,7 +41,7 @@
 
 <!-- ── Nav ── -->
 <nav id="nav" aria-label="Main navigation">
-  <a href="#hero" class="nav-brand" aria-label="Xu Bing Gallery home">
+  <a href="#hero" class="nav-brand">
     <div class="nav-brand-mark" aria-hidden="true">書</div>
     Xu Bing Gallery
   </a>
@@ -62,6 +60,11 @@
 <!-- ════════════════════════════════════════
      HERO
      ════════════════════════════════════════ -->
+<main id="main">
+
+<!-- Scroll progress -->
+<div id="progress-bar" role="progressbar" aria-label="Page reading progress"></div>
+
 <section id="hero">
   <div class="pseudo-bg" id="pseudo-bg" aria-hidden="true"></div>
   <div class="hero-inner">
@@ -145,37 +148,33 @@
       <h2>Choose Your Reading Path</h2>
       <p>Each room isolates a distinct failure mode of legibility. Parasitic friction has been removed — confusion that prevented access. Load-bearing friction remains — confusion that is the artwork.</p>
     </div>
-    <div class="rooms-grid" role="list">
-      <a href="#room-sky" class="room-card reveal" data-room="sky" role="listitem"
-         aria-label="Room 01: Book from the Sky, 1987 to 1991">
-        <div class="room-num" aria-hidden="true">Room 01 / 04</div>
+    <div class="rooms-grid">
+      <a href="#room-sky" class="room-card reveal" data-room="sky">
+        <div class="room-num">Room 01 / 04</div>
         <span class="room-glyph" aria-hidden="true">天</span>
         <div class="room-title">Book from the Sky</div>
         <div class="room-years">1987 — 1991</div>
         <div class="room-desc">4,000 hand-carved pseudo-characters printed in classical format. Recognition fails not at the character level, but at the moment of expected meaning.</div>
         <div class="room-arrow" aria-hidden="true">↗</div>
       </a>
-      <a href="#room-english" class="room-card reveal delay-1" data-room="english" role="listitem"
-         aria-label="Room 02: New English Calligraphy, 1994 to present">
-        <div class="room-num" aria-hidden="true">Room 02 / 04</div>
+      <a href="#room-english" class="room-card reveal delay-1" data-room="english">
+        <div class="room-num">Room 02 / 04</div>
         <span class="room-glyph" aria-hidden="true">英</span>
         <div class="room-title">New English Calligraphy</div>
         <div class="room-years">1994 — Present</div>
         <div class="room-desc">Roman letters reconfigured into square-character forms. Neither Chinese readers nor English readers gain access — cross-cultural illegibility as design principle.</div>
         <div class="room-arrow" aria-hidden="true">↗</div>
       </a>
-      <a href="#room-square" class="room-card reveal delay-2" data-room="square" role="listitem"
-         aria-label="Room 03: Square Word Calligraphy, 2002 to present">
-        <div class="room-num" aria-hidden="true">Room 03 / 04</div>
+      <a href="#room-square" class="room-card reveal delay-2" data-room="square">
+        <div class="room-num">Room 03 / 04</div>
         <span class="room-glyph" aria-hidden="true">方</span>
         <div class="room-title">Square Word Calligraphy</div>
         <div class="room-years">2002 — Present</div>
         <div class="room-desc">English words written in the structural grammar of Chinese calligraphy. Visual universalism as interface paradox — familiar strokes, foreign resolution.</div>
         <div class="room-arrow" aria-hidden="true">↗</div>
       </a>
-      <a href="#theory" class="room-card reveal delay-3" data-room="games" role="listitem"
-         aria-label="Room 04: Language Games, 2010s to present">
-        <div class="room-num" aria-hidden="true">Room 04 / 04</div>
+      <a href="#theory" class="room-card reveal delay-3" data-room="games">
+        <div class="room-num">Room 04 / 04</div>
         <span class="room-glyph" aria-hidden="true">戲</span>
         <div class="room-title">Language Games</div>
         <div class="room-years">2010s — Present</div>
@@ -193,7 +192,7 @@
   <div class="room-bg-char" aria-hidden="true">天</div>
   <div class="room-inner">
     <div class="room-meta">
-      <div class="breadcrumb" role="navigation" aria-label="Location">
+      <div class="breadcrumb" role="navigation" aria-label="Location: Room 01">
         <a href="#foyer">Foyer</a>
         <span class="breadcrumb-sep" aria-hidden="true">—</span>
         <span class="breadcrumb-current">Room 01</span>
@@ -251,7 +250,7 @@
       </div>
     </div>
     <div class="room-meta">
-      <div class="breadcrumb" role="navigation" aria-label="Location">
+      <div class="breadcrumb" role="navigation" aria-label="Location: Room 02">
         <a href="#foyer">Foyer</a>
         <span class="breadcrumb-sep" aria-hidden="true">—</span>
         <span class="breadcrumb-current">Room 02</span>
@@ -274,7 +273,7 @@
   <div class="room-bg-char" style="color:rgba(58,140,140,0.02)" aria-hidden="true">方</div>
   <div class="room-inner">
     <div class="room-meta">
-      <div class="breadcrumb" role="navigation" aria-label="Location">
+      <div class="breadcrumb" role="navigation" aria-label="Location: Room 03">
         <a href="#foyer">Foyer</a>
         <span class="breadcrumb-sep" aria-hidden="true">—</span>
         <span class="breadcrumb-current">Room 03</span>
@@ -462,7 +461,7 @@
     </div>
 
     <div class="theory-continue-wrap" id="theory-continue-wrap">
-      <button class="theory-continue-btn" id="theory-continue-btn" aria-label="Reveal next concept">
+      <button class="theory-continue-btn" id="theory-continue-btn">
         Continue — reveal next concept →
       </button>
     </div>
@@ -474,11 +473,11 @@
       <div class="theory-meta-body">
         The entry button was unreadable. The Glyph Engine required a classification attempt before the label appeared. Both moments were unavoidable. If these moments were bypassed, the intended interpretive sequence became less effective — and that is a meaningful outcome to consider.
       </div>
-      <div class="theory-meta-checks" role="list">
-        <a href="#hero" class="theory-check pending" id="check-entry" role="listitem" aria-label="Entry: unreadable button">
+      <div class="theory-meta-checks">
+        <a href="#hero" class="theory-check pending" id="check-entry" aria-label="Entry: unreadable button">
           Entry — Unreadable Button
         </a>
-        <a href="#glyph-tool" class="theory-check pending" id="check-glyph" role="listitem" aria-label="Glyph Engine: reading attempt">
+        <a href="#glyph-tool" class="theory-check pending" id="check-glyph" aria-label="Glyph Engine: reading attempt">
           Glyph Engine — Reading Attempt
         </a>
       </div>
@@ -529,7 +528,7 @@
   <div class="prov-inner">
     <div class="section-label reveal">Documentation Layer</div>
     <h2 class="reveal">Artwork Provenance &amp; Citation</h2>
-    <div class="reveal" style="overflow-x:auto;">
+    <div class="reveal" style="overflow-x:auto;" tabindex="0" role="region" aria-label="Artwork provenance table">
       <table class="prov-table">
         <thead>
           <tr>
@@ -602,6 +601,8 @@
     </div>
   </div>
 </section>
+
+</main>
 
 <!-- ════════════════════════════════════════
      FOOTER

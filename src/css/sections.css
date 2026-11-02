@@ -133,7 +133,9 @@
 
 /* ── Gallery Rooms ── */
 .gallery-room { padding: 8rem 2rem; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
-.gallery-room:nth-child(even) { background: var(--deep); }
+/* Was .gallery-room:nth-child(even), which matched only #room-english while the
+   sections were direct children of <body>; pinned so wrapping them in <main> keeps the same look. */
+#room-english { background: var(--deep); }
 .gallery-room::after { content: ''; position: absolute; top: 0; left: 0; width: 2px; height: 100%; opacity: 0.5; }
 #room-sky::after     { background: var(--room-1); }
 #room-english::after { background: var(--room-2); }

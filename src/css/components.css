@@ -79,7 +79,7 @@ nav#nav.scrolled { background: rgba(7,7,10,0.97); border-bottom: 1px solid var(-
 .nav-brand-mark {
   width: 28px; height: 28px; border: 1px solid var(--vermillion);
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.85rem; color: var(--vermillion); font-family: var(--cjk);
+  font-size: 0.85rem; color: var(--vermillion-text); font-family: var(--cjk);
 }
 .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
 .nav-links a {
@@ -93,7 +93,7 @@ nav#nav.scrolled { background: rgba(7,7,10,0.97); border-bottom: 1px solid var(-
   display: flex; align-items: center; gap: 0.5rem;
   font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.2em;
   text-transform: uppercase; padding: 0.35rem 0.8rem;
-  border: 1px solid var(--vermillion); color: var(--vermillion);
+  border: 1px solid var(--vermillion); color: var(--vermillion-text);
   opacity: 0; transition: opacity 0.4s, border-color 0.4s, color 0.4s;
   white-space: nowrap;
 }
@@ -159,10 +159,10 @@ nav#nav.scrolled { background: rgba(7,7,10,0.97); border-bottom: 1px solid var(-
 }
 .glyph-btn:hover,
 .glyph-btn.active  { background: var(--paper-ghost); border-color: var(--paper); color: var(--paper); }
-.glyph-btn.danger  { border-color: var(--vermillion); color: var(--vermillion); }
+.glyph-btn.danger  { border-color: var(--vermillion); color: var(--vermillion-text); }
 .glyph-btn.danger:hover { background: var(--vermillion-soft); }
 .glyph-btn.success { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
-.glyph-btn.fail    { border-color: var(--vermillion); color: var(--vermillion); background: var(--vermillion-soft); }
+.glyph-btn.fail    { border-color: var(--vermillion); color: var(--vermillion-text); background: var(--vermillion-soft); }
 
 /* ── Blockquote ── */
 blockquote {
@@ -193,7 +193,7 @@ blockquote cite {
 }
 .char-matrix span:hover { color: var(--paper); background: var(--paper-ghost); }
 .char-matrix span.dim       { opacity: 0.25; }
-.char-matrix span.highlight { color: var(--vermillion); border-color: rgba(191,41,41,0.2); }
+.char-matrix span.highlight { color: var(--vermillion-text); border-color: rgba(191,41,41,0.2); }
 .artwork-info { padding: 1.5rem; }
 .artwork-title     { font-family: var(--cjk); font-size: 0.95rem; margin-bottom: 0.5rem; }
 .artwork-meta-line { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.1em; color: var(--paper-dim); margin-bottom: 0.8rem; }
@@ -226,7 +226,7 @@ blockquote cite {
 .glyph-option-btn:hover  { background: var(--paper-ghost); border-color: var(--paper); color: var(--paper); }
 .glyph-option-btn:disabled { cursor: not-allowed; }
 .glyph-option-btn.correct { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
-.glyph-option-btn.wrong   { border-color: var(--vermillion); color: var(--vermillion); background: var(--vermillion-soft); }
+.glyph-option-btn.wrong   { border-color: var(--vermillion); color: var(--vermillion-text); background: var(--vermillion-soft); }
 .glyph-option-btn.reveal  { border-color: var(--border-strong); color: var(--paper-dim); }
 .glyph-status {
   font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em;
@@ -234,7 +234,7 @@ blockquote cite {
 }
 .glyph-status.neutral  { color: var(--paper-dim); }
 .glyph-status.success  { color: var(--gold); }
-.glyph-status.failure  { color: var(--vermillion); }
+.glyph-status.failure  { color: var(--vermillion-text); }
 .glyph-status.resolved { color: var(--teal); }
 .glyph-result {
   background: var(--paper-ghost); border: 1px solid var(--border);
@@ -264,7 +264,7 @@ blockquote cite {
 .timeline-dot      { position: absolute; left: -2.5rem; top: 0.4rem; width: 8px; height: 8px; border-radius: 50%; background: var(--vermillion); }
 .timeline-dot.gold { background: var(--gold); }
 .timeline-dot.teal { background: var(--teal); }
-.timeline-year   { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; color: var(--vermillion); margin-bottom: 0.5rem; }
+.timeline-year   { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; color: var(--vermillion-text); margin-bottom: 0.5rem; }
 .timeline-event  { font-family: var(--cjk); font-size: 1.1rem; margin-bottom: 0.4rem; }
 .timeline-detail { font-size: 0.88rem; color: var(--paper-dim); line-height: 1.7; }
 .timeline-theory-link {
@@ -314,7 +314,7 @@ blockquote cite {
 .concept-cell.revealed { opacity: 1; transform: translateY(0); }
 .concept-cell:hover    { background: var(--surface); }
 .concept-icon { font-family: var(--cjk); font-size: 2rem; margin-bottom: 1rem; display: block; }
-.concept-name { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--vermillion); margin-bottom: 0.6rem; }
+.concept-name { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--vermillion-text); margin-bottom: 0.6rem; }
 .concept-def  { font-size: 0.88rem; color: var(--paper-dim); line-height: 1.7; }
 .concept-timeline-link {
   display: inline-block; font-family: var(--mono); font-size: 0.5rem;
@@ -354,7 +354,7 @@ blockquote cite {
 /* ── AR Panel ── */
 .ar-sim-note {
   font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--paper-dim); opacity: 0.55; margin-top: 0.7rem;
+  text-transform: uppercase; color: var(--paper-dim); opacity: 0.62; margin-top: 0.7rem; /* was 0.55: 3.77:1 -> 4.56:1 */
 }
 .ar-preview {
   aspect-ratio: 16/10; background: var(--surface);

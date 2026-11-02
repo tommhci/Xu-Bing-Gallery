@@ -12,6 +12,9 @@
   --paper-ghost2:    rgba(240,230,211,0.04);
 
   --vermillion:      #bf2929;
+  /* Same hue as --vermillion, lightened only enough for 4.5:1 on --ink/--deep/--surface (WCAG 1.4.3).
+     Used for text; fills, borders and the focus ring keep --vermillion. */
+  --vermillion-text: #d94c4c;
   --vermillion-soft: rgba(191,41,41,0.18);
   --vermillion-glow: rgba(191,41,41,0.35);
   --gold:            #c9a356;

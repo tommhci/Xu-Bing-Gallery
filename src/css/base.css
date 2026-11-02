@@ -56,7 +56,7 @@ section { position: relative; }
 .section-label {
   font-family: var(--mono); font-size: 0.58rem;
   letter-spacing: 0.35em; text-transform: uppercase;
-  color: var(--vermillion); margin-bottom: 1.5rem;
+  color: var(--vermillion-text); margin-bottom: 1.5rem;
   display: flex; align-items: center; gap: 0.8rem;
 }
 .section-label::before {

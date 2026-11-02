@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Browser for the axe-core accessibility check (version follows package-lock).
+      - run: npx playwright install --with-deps chromium
+
+      - name: Build
+        id: build
+        run: npm run build
+
+      - name: Check internal links and asset references (offline)
+        run: npm run check:links
+
+      # Runs even if the link check failed, so both reports are visible.
+      - name: Accessibility check (axe-core + Playwright)
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: npm run check:a11y

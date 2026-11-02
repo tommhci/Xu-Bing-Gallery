@@ -130,6 +130,19 @@ npm run preview
 
 The local dev server runs at `http://localhost:5173` by default.
 
+## Quality Checks
+
+```bash
+npm ci
+npx playwright install chromium   # once, if no Chromium is installed for Playwright
+npm run check                     # build + check:links + check:a11y
+```
+
+- `npm run check:links` (`scripts/check-links.mjs`): verifies, offline, that every internal link, `#anchor` and asset reference in `dist/` resolves, plus relative links in the root Markdown files. External URLs are not fetched.
+- `npm run check:a11y` (`scripts/check-a11y.mjs`): serves `dist/` locally, loads the page in headless Chromium at desktop and mobile widths, scrolls so revealed content is visible, and runs axe-core (WCAG 2.0–2.2 A/AA and best-practice rules, including image alt text, page language, heading order and colour contrast). Any violation fails the run; results axe cannot decide automatically are listed but not counted.
+
+`.github/workflows/ci.yml` runs the same checks on every push and pull request.
+
 ## Deployment
 
 GitHub Pages deployment is handled by `.github/workflows/deploy.yml` on pushes to `main`. The workflow installs dependencies, runs `npm run build`, uploads the generated `dist/` directory, and deploys that artifact through GitHub Pages.

@@ -16,7 +16,7 @@ export function init() {
           current = id;
           indicator.textContent = meta.label;
           indicator.style.setProperty('border-color', meta.color);
-          indicator.style.setProperty('color', meta.color);
+          indicator.style.setProperty('color', meta.textColor || meta.color);
           indicator.classList.add('visible');
         }
       } else {

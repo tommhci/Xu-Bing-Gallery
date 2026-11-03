@@ -60,17 +60,19 @@ export const DATA = Object.freeze({
   ]),
 
   /** YOU ARE HERE — all 11 sections tracked (P2 fix: was only 4) */
+  // color = fill/border accent (fills keep the saturated hue). textColor = the
+  // same hue lightened to clear 4.5:1 on --ink, for the label that renders as text.
   roomMeta: Object.freeze({
-    'hero':         { label: 'Entry',                               color: '#bf2929' },
-    'artist':       { label: 'Artist Profile',                      color: '#c8bba8' },
-    'foyer':        { label: 'Navigation Foyer',                    color: '#c8bba8' },
-    'room-sky':     { label: 'Room 01 — Book from the Sky',         color: '#bf2929' },
-    'room-english': { label: 'Room 02 — New English Calligraphy',   color: '#c9a356' },
-    'room-square':  { label: 'Room 03 — Square Word Calligraphy',   color: '#3a8c8c' },
-    'glyph-tool':   { label: 'Glyph Engine',                        color: '#7a5cbf' },
-    'timeline':     { label: 'Timeline',                            color: '#c8bba8' },
-    'theory':       { label: 'Theoretical Frame',                   color: '#c8bba8' },
-    'ar-panel':     { label: 'AR Integration',                      color: '#c8bba8' },
-    'provenance':   { label: 'Provenance',                          color: '#c8bba8' },
+    'hero':         { label: 'Entry',                               color: '#bf2929', textColor: '#d94c4c' },
+    'artist':       { label: 'Artist Profile',                      color: '#c8bba8', textColor: '#c8bba8' },
+    'foyer':        { label: 'Navigation Foyer',                    color: '#c8bba8', textColor: '#c8bba8' },
+    'room-sky':     { label: 'Room 01 — Book from the Sky',         color: '#bf2929', textColor: '#d94c4c' },
+    'room-english': { label: 'Room 02 — New English Calligraphy',   color: '#c9a356', textColor: '#c9a356' },
+    'room-square':  { label: 'Room 03 — Square Word Calligraphy',   color: '#3a8c8c', textColor: '#3a8c8c' },
+    'glyph-tool':   { label: 'Glyph Engine',                        color: '#7a5cbf', textColor: '#886ec6' },
+    'timeline':     { label: 'Timeline',                            color: '#c8bba8', textColor: '#c8bba8' },
+    'theory':       { label: 'Theoretical Frame',                   color: '#c8bba8', textColor: '#c8bba8' },
+    'ar-panel':     { label: 'AR Integration',                      color: '#c8bba8', textColor: '#c8bba8' },
+    'provenance':   { label: 'Provenance',                          color: '#c8bba8', textColor: '#c8bba8' },
   }),
 });

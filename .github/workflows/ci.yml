@@ -38,3 +38,9 @@ jobs:
       - name: Accessibility check (axe-core + Playwright)
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: npm run check:a11y
+
+      # axe reports text over gradients and composited tints as "incomplete",
+      # not as violations, so the step above cannot see that class of defect.
+      - name: Contrast check (composited text, the cases axe cannot decide)
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: npm run check:contrast

@@ -68,7 +68,7 @@
 <section id="hero">
   <div class="pseudo-bg" id="pseudo-bg" aria-hidden="true"></div>
   <div class="hero-inner">
-    <div class="hero-eyebrow" aria-hidden="true">Epistemic Gallery System</div>
+    <div class="hero-eyebrow">Epistemic Gallery System</div>
     <h1 class="hero-title">
       徐冰
       <span>Xu Bing</span>
@@ -97,7 +97,7 @@
       </a>
     </div>
   </div>
-  <div class="hero-scroll-hint" aria-hidden="true">
+  <div class="hero-scroll-hint">
     <div class="scroll-line"></div>
     scroll
   </div>
@@ -108,8 +108,8 @@
      ════════════════════════════════════════ -->
 <section id="artist" aria-label="Artist profile">
   <div class="reveal">
-    <div class="artist-portrait" aria-hidden="true">
-      <div class="artist-portrait-inner">書天地人文心道德</div>
+    <div class="artist-portrait">
+      <div class="artist-portrait-inner" data-contrast-exempt="true" aria-hidden="true">書天地人文心道德</div>
       <div class="portrait-year">b. 1955</div>
       <div class="portrait-caption">Xu Bing / 徐冰 — Beijing, China → New York, USA</div>
     </div>
@@ -189,7 +189,7 @@
      ROOM 1 — Book from the Sky
      ════════════════════════════════════════ -->
 <section class="gallery-room" id="room-sky" aria-label="Room 01: Book from the Sky">
-  <div class="room-bg-char" aria-hidden="true">天</div>
+  <div class="room-bg-char" aria-hidden="true" data-contrast-exempt="true">天</div>
   <div class="room-inner">
     <div class="room-meta">
       <div class="breadcrumb" role="navigation" aria-label="Location: Room 01">
@@ -231,15 +231,15 @@
      ROOM 2 — New English Calligraphy
      ════════════════════════════════════════ -->
 <section class="gallery-room" id="room-english" aria-label="Room 02: New English Calligraphy">
-  <div class="room-bg-char" style="color:rgba(201,163,86,0.02)" aria-hidden="true">英</div>
+  <div class="room-bg-char" style="color:rgba(201,163,86,0.02)" aria-hidden="true" data-contrast-exempt="true">英</div>
   <div class="room-inner">
     <div class="reveal delay-1">
       <div class="artwork-card">
         <div class="artwork-visual" style="background:var(--ink);">
           <div style="font-family:var(--cjk);font-size:clamp(2rem,6vw,4.5rem);line-height:1.3;padding:2rem;text-align:center;color:var(--gold);opacity:0.8;">
-            <div style="font-size:0.45em;color:var(--paper-dim);font-family:var(--mono);letter-spacing:0.3em;margin-bottom:1rem;" aria-hidden="true">ENGLISH → CALLIGRAPHY</div>
+            <div style="font-size:0.45em;color:var(--paper-dim);font-family:var(--mono);letter-spacing:0.3em;margin-bottom:1rem;">ENGLISH → CALLIGRAPHY</div>
             <span aria-label="English letters rendered in Chinese calligraphic form">㊣㊥㊦㊧</span>
-            <div style="font-size:0.35em;margin-top:1rem;color:var(--paper-dim);font-family:var(--mono);" aria-hidden="true">[ reading path suspended ]</div>
+            <div style="font-size:0.35em;margin-top:1rem;color:var(--paper-dim);font-family:var(--mono);">[ reading path suspended ]</div>
           </div>
         </div>
         <div class="artwork-info">
@@ -270,7 +270,7 @@
      ROOM 3 — Square Word Calligraphy
      ════════════════════════════════════════ -->
 <section class="gallery-room" id="room-square" aria-label="Room 03: Square Word Calligraphy">
-  <div class="room-bg-char" style="color:rgba(58,140,140,0.02)" aria-hidden="true">方</div>
+  <div class="room-bg-char" style="color:rgba(58,140,140,0.02)" aria-hidden="true" data-contrast-exempt="true">方</div>
   <div class="room-inner">
     <div class="room-meta">
       <div class="breadcrumb" role="navigation" aria-label="Location: Room 03">
@@ -296,7 +296,7 @@
       <div class="artwork-card">
         <div class="artwork-visual" style="background:var(--ink);min-height:280px;">
           <div style="padding:2.5rem;text-align:center;width:100%;">
-            <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:0.3em;color:var(--teal);margin-bottom:2rem;" aria-hidden="true">SQUARE WORD — LIVE COMPOSITION</div>
+            <div style="font-family:var(--mono);font-size:0.55rem;letter-spacing:0.3em;color:var(--teal);margin-bottom:2rem;">SQUARE WORD — LIVE COMPOSITION</div>
             <div id="square-word-display"
                  style="font-family:var(--cjk);font-size:clamp(2.5rem,8vw,5rem);color:var(--paper);opacity:0.85;line-height:1.2;min-height:80px;transition:all 0.4s;"
                  aria-live="polite" aria-label="Square word character display"></div>
@@ -328,7 +328,7 @@
     <div class="glyph-stage reveal" role="region" aria-label="Glyph classification challenge">
       <div class="glyph-stage-meta">
         <span class="glyph-score" id="glyph-score" aria-live="polite">Attempts: 0 · Correct: 0</span>
-        <span id="glyph-mode-label" aria-hidden="true">— / —</span>
+        <span id="glyph-mode-label">— / —</span>
       </div>
       <div class="glyph-display" id="glyph-main" aria-label="Character to classify" role="img" aria-atomic="true"></div>
       <div class="glyph-status neutral" id="glyph-status" aria-live="assertive">
@@ -494,8 +494,8 @@
       <div class="section-label reveal">Spatial / Augmented</div>
       <div class="ar-preview reveal" aria-label="AR preview simulation" role="img">
         <div class="ar-scan-line" aria-hidden="true"></div>
-        <div class="ar-grid" id="ar-grid" aria-hidden="true"></div>
-        <div class="ar-badge" aria-hidden="true">Prototype — Simulation</div>
+        <div class="ar-grid" id="ar-grid" aria-hidden="true" data-contrast-exempt="true"></div>
+        <div class="ar-badge">Prototype — Simulation</div>
       </div>
       <p class="ar-sim-note">Spatial extension concept. Hardware AR is outside this browser build.</p>
     </div>

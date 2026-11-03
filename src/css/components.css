@@ -273,7 +273,7 @@ blockquote cite {
   border: 1px solid rgba(122,92,191,0.3); padding: 0.2rem 0.5rem;
   margin-top: 0.4rem; text-decoration: none; transition: all 0.2s;
 }
-.timeline-theory-link:hover { background: var(--violet-soft); color: #927acb; } /* the tinted hover ground needs a lighter violet to keep 4.5:1 */
+.timeline-theory-link:hover { background: var(--violet-soft); color: var(--violet-text-on-tint); } /* the tinted hover ground needs a lighter violet to keep 4.5:1 */
 
 /* ── Authorship tag ── */
 .authorship-tag {

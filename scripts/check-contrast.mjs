@@ -145,7 +145,14 @@ let approximate = 0;
 
 for (const vp of VIEWPORTS) {
   const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height } });
-  await page.goto(ORIGIN, { waitUntil: 'networkidle' });
+  // 'networkidle' is the wrong invariant: contrast depends on fonts and the intro
+  // loader having settled, not on network quiescence. It also made the gate flaky --
+  // under machine load (a sibling chromium still running) the 30s networkidle wait
+  // expired and the whole check crashed rather than reporting a contrast verdict.
+  // Wait on the actual preconditions instead.
+  await page.goto(ORIGIN, { waitUntil: 'load', timeout: 60000 });
+  await page.waitForFunction(() => !document.getElementById('loader'), null, { timeout: 15000 }).catch(() => {});
+  await page.evaluate(() => (document.fonts ? document.fonts.ready : Promise.resolve()));
   // scroll-reveal animations leave text at opacity 0 until it enters the viewport
   await page.evaluate(async () => {
     for (let y = 0; y < document.body.scrollHeight; y += 400) {

@@ -1,0 +1,262 @@
+// Contrast check for text the axe rules report as "incomplete".
+//
+// axe cannot decide contrast for text over gradients, over composited tints, or
+// for short/pseudo content — it lists those as "incomplete" rather than as
+// violations, so a green axe run says nothing about them. Three real defects on
+// this site lived in exactly that blind spot (a vermillion text token reused on
+// its own 18% tint, and a nav label that had a fill colour written into its text
+// colour at runtime).
+//
+// This check resolves the computed colours itself: it walks every text node,
+// composites the ancestor background chain from the root down, and compares
+// against WCAG 2.1 AA. Decorative text is skipped on the page's own declaration
+// (aria-hidden="true" or role="img" on the element or an ancestor) — WCAG 1.4.3
+// exempts text that is pure decoration, and the art layer here is deliberately
+// illegible.
+//
+// Gradients cannot be composited exactly. When one is met the nearest opaque
+// ancestor is used as the base and the result is marked approximate; it is still
+// compared, so a regression behind the nav gradient is not silently skipped.
+import { createServer } from 'node:http';
+import { readFileSync, existsSync, statSync } from 'node:fs';
+import { join, dirname, resolve, extname, normalize } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { chromium } from 'playwright';
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const DIST = join(ROOT, 'dist');
+const viteConfig = readFileSync(join(ROOT, 'vite.config.js'), 'utf8');
+const BASE = (viteConfig.match(/base:\s*['"]([^'"]+)['"]/) || [, '/'])[1];
+
+const VIEWPORTS = [
+  { name: 'desktop', width: 1440, height: 900 },
+  { name: 'mobile', width: 390, height: 844 },
+];
+const MIME = {
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css',
+  '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml',
+  '.webp': 'image/webp', '.woff2': 'font/woff2', '.json': 'application/json', '.ico': 'image/x-icon',
+};
+
+if (!existsSync(join(DIST, 'index.html'))) {
+  console.error('dist/index.html not found - run `npm run build` first.');
+  process.exit(1);
+}
+
+const server = createServer((req, res) => {
+  const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  if (!path.startsWith(BASE)) { res.writeHead(404).end(); return; }
+  let file = normalize(join(DIST, path.slice(BASE.length)));
+  if (!file.startsWith(DIST)) { res.writeHead(403).end(); return; }
+  if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');
+  if (!existsSync(file)) { res.writeHead(404).end(); return; }
+  res.writeHead(200, { 'Content-Type': MIME[extname(file)] || 'application/octet-stream' });
+  res.end(readFileSync(file));
+});
+
+await new Promise((r) => server.listen(0, '127.0.0.1', r));
+const ORIGIN = `http://127.0.0.1:${server.address().port}${BASE}`;
+
+const browser = await chromium.launch();
+const findings = [];
+let examined = 0;
+let skippedDecorative = 0;
+let approximate = 0;
+
+for (const vp of VIEWPORTS) {
+  const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height } });
+  await page.goto(ORIGIN, { waitUntil: 'networkidle' });
+  // scroll-reveal animations leave text at opacity 0 until it enters the viewport
+  await page.evaluate(async () => {
+    for (let y = 0; y < document.body.scrollHeight; y += 400) {
+      window.scrollTo(0, y);
+      await new Promise((r) => setTimeout(r, 40));
+    }
+    window.scrollTo(0, 0);
+  });
+  await page.waitForTimeout(600);
+
+  const rows = await page.evaluate(() => {
+    const parse = (s) => {
+      const m = s.match(/rgba?\(([^)]+)\)/);
+      if (!m) return null;
+      const p = m[1].split(/[,/\s]+/).filter(Boolean).map(Number);
+      return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
+    };
+    const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+    const lum = (c) => 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b);
+    const ratio = (a, b) => {
+      const la = lum(a), lb = lum(b);
+      return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+    };
+    const decorative = (el) => {
+      let cur = el;
+      while (cur && cur !== document.documentElement) {
+        if (cur.getAttribute && (cur.getAttribute('aria-hidden') === 'true' || cur.getAttribute('role') === 'img')) return true;
+        cur = cur.parentElement;
+      }
+      return false;
+    };
+
+    const out = [];
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const seen = new Set();
+    let node;
+    while ((node = walker.nextNode())) {
+      const text = node.nodeValue.trim();
+      if (!text) continue;
+      const el = node.parentElement;
+      if (!el || seen.has(el)) continue;
+      seen.add(el);
+      const cs = getComputedStyle(el);
+      if (cs.visibility === 'hidden' || cs.display === 'none') continue;
+      const rect = el.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) continue;
+      if (decorative(el)) { out.push({ decorative: true }); continue; }
+
+      const fgRaw = parse(cs.color);
+      if (!fgRaw) continue;
+
+      const layers = [];
+      let gradient = false;
+      let cur = el;
+      while (cur) {
+        const bcs = getComputedStyle(cur);
+        const bc = parse(bcs.backgroundColor);
+        if (bc && bc.a > 0) layers.push(bc);
+        if (bcs.backgroundImage && bcs.backgroundImage !== 'none') gradient = true;
+        if (layers.length && layers[layers.length - 1].a >= 1) break;
+        cur = cur.parentElement;
+      }
+
+      let bg = { r: 255, g: 255, b: 255, a: 1 };
+      for (let i = layers.length - 1; i >= 0; i--) {
+        const L = layers[i];
+        bg = {
+          r: L.r * L.a + bg.r * (1 - L.a),
+          g: L.g * L.a + bg.g * (1 - L.a),
+          b: L.b * L.a + bg.b * (1 - L.a),
+          a: 1,
+        };
+      }
+      const fg = fgRaw.a < 1
+        ? { r: fgRaw.r * fgRaw.a + bg.r * (1 - fgRaw.a),
+            g: fgRaw.g * fgRaw.a + bg.g * (1 - fgRaw.a),
+            b: fgRaw.b * fgRaw.a + bg.b * (1 - fgRaw.a) }
+        : fgRaw;
+
+      const size = parseFloat(cs.fontSize);
+      const weight = parseInt(cs.fontWeight, 10) || 400;
+      const large = size >= 24 || (size >= 18.66 && weight >= 700);
+      out.push({
+        decorative: false,
+        tag: el.tagName.toLowerCase(),
+        cls: (el.className || '').toString().slice(0, 50),
+        text: text.slice(0, 40),
+        fg: cs.color,
+        bg: `rgb(${Math.round(bg.r)}, ${Math.round(bg.g)}, ${Math.round(bg.b)})`,
+        ratio: +ratio(fg, bg).toFixed(2),
+        need: large ? 3.0 : 4.5,
+        gradient,
+      });
+    }
+    return out;
+  });
+
+  for (const r of rows) {
+    if (r.decorative) { skippedDecorative++; continue; }
+    examined++;
+    if (r.gradient) approximate++;
+    if (r.ratio < r.need) findings.push({ vp: vp.name, ...r });
+  }
+
+  // The nav indicator is written by script on scroll, so a single static walk
+  // sees whichever label happened to be active. Sweep every section instead:
+  // this element is where a fill colour was once painted as text.
+  if (vp.name === 'desktop') {
+    const ids = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('[id]'))
+        .filter((e) => e.dataset && (e.id.startsWith('room-') || ['hero', 'glyph-tool', 'timeline', 'theory', 'ar-panel', 'provenance', 'artist'].includes(e.id)))
+        .map((e) => e.id)
+    );
+    for (const id of ids) {
+      const moved = await page.evaluate((target) => {
+        const el = document.getElementById(target);
+        if (!el) return false;
+        el.scrollIntoView({ block: 'center' });
+        return true;
+      }, id);
+      if (!moved) continue;
+      await page.waitForTimeout(650);
+      const snap = await page.evaluate(() => {
+        const ind = document.getElementById('nav-room-indicator');
+        if (!ind) return null;
+        const cs = getComputedStyle(ind);
+        if (!ind.textContent.trim() || cs.opacity === '0') return null;
+        const parse = (s) => {
+          const m = s.match(/rgba?\(([^)]+)\)/);
+          if (!m) return null;
+          const p = m[1].split(/[,/\s]+/).filter(Boolean).map(Number);
+          return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
+        };
+        const layers = [];
+        let cur = ind;
+        while (cur) {
+          const bcs = getComputedStyle(cur);
+          const bc = parse(bcs.backgroundColor);
+          if (bc && bc.a > 0) layers.push(bc);
+          if (layers.length && layers[layers.length - 1].a >= 1) break;
+          cur = cur.parentElement;
+        }
+        let bg = { r: 255, g: 255, b: 255, a: 1 };
+        for (let i = layers.length - 1; i >= 0; i--) {
+          const L = layers[i];
+          bg = { r: L.r * L.a + bg.r * (1 - L.a), g: L.g * L.a + bg.g * (1 - L.a),
+                 b: L.b * L.a + bg.b * (1 - L.a), a: 1 };
+        }
+        return { label: ind.textContent.trim(), fg: cs.color,
+                 bg: `rgb(${Math.round(bg.r)}, ${Math.round(bg.g)}, ${Math.round(bg.b)})` };
+      });
+      if (!snap) continue;
+      const parse = (s) => {
+        const m = s.match(/rgba?\(([^)]+)\)/);
+        const p = m[1].split(/[,/\s]+/).filter(Boolean).map(Number);
+        return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
+      };
+      const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+      const lum = (c) => 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b);
+      const fg = parse(snap.fg), bgg = parse(snap.bg);
+      const la = lum(fg), lb = lum(bgg);
+      const cr = +((Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)).toFixed(2);
+      examined++;
+      if (cr < 4.5) {
+        findings.push({ vp: 'desktop', tag: 'div', cls: 'nav-room-indicator', text: snap.label,
+                        fg: snap.fg, bg: snap.bg, ratio: cr, need: 4.5, gradient: false });
+      }
+    }
+  }
+
+  await page.close();
+}
+
+await browser.close();
+server.close();
+
+console.log(`text nodes examined      : ${examined}`);
+console.log(`decorative (aria-hidden) : ${skippedDecorative} (exempt, WCAG 1.4.3)`);
+console.log(`approximate (gradient)   : ${approximate}`);
+console.log(`below threshold          : ${findings.length}`);
+
+if (findings.length) {
+  console.log('');
+  for (const f of findings) {
+    console.log(
+      `FAIL ${f.ratio} < ${f.need}  ${f.vp}  ${f.tag}.${f.cls}  "${f.text}"  ` +
+        `fg=${f.fg} bg=${f.bg}${f.gradient ? ' (approximate: gradient)' : ''}`
+    );
+  }
+  console.log('\nContrast check failed.');
+  process.exit(1);
+}
+
+console.log('\nContrast check passed.');

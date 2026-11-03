@@ -160,9 +160,9 @@ nav#nav.scrolled { background: rgba(7,7,10,0.97); border-bottom: 1px solid var(-
 .glyph-btn:hover,
 .glyph-btn.active  { background: var(--paper-ghost); border-color: var(--paper); color: var(--paper); }
 .glyph-btn.danger  { border-color: var(--vermillion); color: var(--vermillion-text); }
-.glyph-btn.danger:hover { background: var(--vermillion-soft); }
+.glyph-btn.danger:hover { background: var(--vermillion-soft); color: var(--vermillion-text-on-tint); }
 .glyph-btn.success { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
-.glyph-btn.fail    { border-color: var(--vermillion); color: var(--vermillion-text); background: var(--vermillion-soft); }
+.glyph-btn.fail    { border-color: var(--vermillion); color: var(--vermillion-text-on-tint); background: var(--vermillion-soft); }
 
 /* ── Blockquote ── */
 blockquote {
@@ -226,7 +226,7 @@ blockquote cite {
 .glyph-option-btn:hover  { background: var(--paper-ghost); border-color: var(--paper); color: var(--paper); }
 .glyph-option-btn:disabled { cursor: not-allowed; }
 .glyph-option-btn.correct { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
-.glyph-option-btn.wrong   { border-color: var(--vermillion); color: var(--vermillion-text); background: var(--vermillion-soft); }
+.glyph-option-btn.wrong   { border-color: var(--vermillion); color: var(--vermillion-text-on-tint); background: var(--vermillion-soft); }
 .glyph-option-btn.reveal  { border-color: var(--border-strong); color: var(--paper-dim); }
 .glyph-status {
   font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em;

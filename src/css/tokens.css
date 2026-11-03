@@ -15,6 +15,10 @@
   /* Same hue as --vermillion, lightened only enough for 4.5:1 on --ink/--deep/--surface (WCAG 1.4.3).
      Used for text; fills, borders and the focus ring keep --vermillion. */
   --vermillion-text: #d94c4c;
+  /* Text sitting on --vermillion-soft (18% tint over the dark grounds) needs one more
+     lightness step: #d94c4c reads 4.01-4.40:1 there, below the 4.5:1 text minimum.
+     Hue kept, lightness raised only enough to reach 4.57-4.99:1. */
+  --vermillion-text-on-tint: #dd5d5d;
   --vermillion-soft: rgba(191,41,41,0.18);
   --vermillion-glow: rgba(191,41,41,0.35);
   --gold:            #c9a356;

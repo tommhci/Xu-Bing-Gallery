@@ -18,7 +18,7 @@
 // ancestor is used as the base and the result is marked approximate; it is still
 // compared, so a regression behind the nav gradient is not silently skipped.
 import { createServer } from 'node:http';
-import { readFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, resolve, extname, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
@@ -42,6 +42,51 @@ if (!existsSync(join(DIST, 'index.html'))) {
   console.error('dist/index.html not found - run `npm run build` first.');
   process.exit(1);
 }
+
+// --- static phase: every var(--token) without a fallback must be defined -----
+// A misspelled token does not fail loudly: `color: var(--typo)` becomes invalid
+// at computed-value time and the element simply inherits its parent's colour,
+// which on this page is a light text colour and therefore still passes the
+// contrast test. Verified: renaming --vermillion-text to a typo left the gate
+// green. So resolve the names statically as well.
+const DEFINED = new Set();
+const VAR_SOURCES = [];
+{
+  const cssDir = join(ROOT, 'src', 'css');
+  for (const f of readdirSync(cssDir)) {
+    if (!f.endsWith('.css')) continue;
+    const text = readFileSync(join(cssDir, f), 'utf8');
+    for (const m of text.matchAll(/(--[A-Za-z0-9_-]+)\s*:/g)) DEFINED.add(m[1]);
+    VAR_SOURCES.push({ file: `src/css/${f}`, text });
+  }
+  const walk = (dir) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, e.name);
+      if (e.isDirectory()) walk(full);
+      else if (e.name.endsWith('.js')) {
+        VAR_SOURCES.push({
+          file: full.replace(ROOT + '\\', '').replace(ROOT + '/', '').replace(/\\/g, '/'),
+          text: readFileSync(full, 'utf8'),
+        });
+      }
+    }
+  };
+  walk(join(ROOT, 'src', 'js'));
+}
+const unresolved = [];
+for (const { file, text } of VAR_SOURCES) {
+  // no-fallback form only: var(--x) — var(--x, fallback) is safe by construction
+  for (const m of text.matchAll(/var\(\s*(--[A-Za-z0-9_-]+)\s*\)/g)) {
+    if (!DEFINED.has(m[1])) unresolved.push(`${file}: ${m[1]}`);
+  }
+}
+if (unresolved.length) {
+  console.log('Undefined CSS custom properties referenced without a fallback:');
+  for (const u of [...new Set(unresolved)]) console.log(`  FAIL ${u}`);
+  console.log(`\n${new Set(unresolved).size} unresolved token reference(s).`);
+  process.exit(1);
+}
+console.log(`token references resolved: ${DEFINED.size} defined, no dangling var() found`);
 
 const server = createServer((req, res) => {
   const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);

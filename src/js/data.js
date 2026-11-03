@@ -60,19 +60,21 @@ export const DATA = Object.freeze({
   ]),
 
   /** YOU ARE HERE — all 11 sections tracked (P2 fix: was only 4) */
-  // color = fill/border accent (fills keep the saturated hue). textColor = the
-  // same hue lightened to clear 4.5:1 on --ink, for the label that renders as text.
+  // Colors are CSS custom properties, not literals: the tokens in
+  // src/css/tokens.css stay the single source of truth, so a palette change
+  // reaches the runtime label without editing this file.
+  // color = fill/border accent; textColor = the same hue lightened for text.
   roomMeta: Object.freeze({
-    'hero':         { label: 'Entry',                               color: '#bf2929', textColor: '#d94c4c' },
-    'artist':       { label: 'Artist Profile',                      color: '#c8bba8', textColor: '#c8bba8' },
-    'foyer':        { label: 'Navigation Foyer',                    color: '#c8bba8', textColor: '#c8bba8' },
-    'room-sky':     { label: 'Room 01 — Book from the Sky',         color: '#bf2929', textColor: '#d94c4c' },
-    'room-english': { label: 'Room 02 — New English Calligraphy',   color: '#c9a356', textColor: '#c9a356' },
-    'room-square':  { label: 'Room 03 — Square Word Calligraphy',   color: '#3a8c8c', textColor: '#3a8c8c' },
-    'glyph-tool':   { label: 'Glyph Engine',                        color: '#7a5cbf', textColor: '#886ec6' },
-    'timeline':     { label: 'Timeline',                            color: '#c8bba8', textColor: '#c8bba8' },
-    'theory':       { label: 'Theoretical Frame',                   color: '#c8bba8', textColor: '#c8bba8' },
-    'ar-panel':     { label: 'AR Integration',                      color: '#c8bba8', textColor: '#c8bba8' },
-    'provenance':   { label: 'Provenance',                          color: '#c8bba8', textColor: '#c8bba8' },
+    'hero':         { label: 'Entry',                               color: 'var(--vermillion)', textColor: 'var(--vermillion-text)' },
+    'artist':       { label: 'Artist Profile',                      color: 'var(--paper-dim)',  textColor: 'var(--paper-dim)' },
+    'foyer':        { label: 'Navigation Foyer',                    color: 'var(--paper-dim)',  textColor: 'var(--paper-dim)' },
+    'room-sky':     { label: 'Room 01 — Book from the Sky',         color: 'var(--vermillion)', textColor: 'var(--vermillion-text)' },
+    'room-english': { label: 'Room 02 — New English Calligraphy',   color: 'var(--gold)',       textColor: 'var(--gold)' },
+    'room-square':  { label: 'Room 03 — Square Word Calligraphy',   color: 'var(--teal)',       textColor: 'var(--teal)' },
+    'glyph-tool':   { label: 'Glyph Engine',                        color: 'var(--violet)',     textColor: 'var(--violet-text)' },
+    'timeline':     { label: 'Timeline',                            color: 'var(--paper-dim)',  textColor: 'var(--paper-dim)' },
+    'theory':       { label: 'Theoretical Frame',                   color: 'var(--paper-dim)',  textColor: 'var(--paper-dim)' },
+    'ar-panel':     { label: 'AR Integration',                      color: 'var(--paper-dim)',  textColor: 'var(--paper-dim)' },
+    'provenance':   { label: 'Provenance',                          color: 'var(--paper-dim)',  textColor: 'var(--paper-dim)' },
   }),
 });

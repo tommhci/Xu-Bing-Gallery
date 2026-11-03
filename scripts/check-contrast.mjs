@@ -9,10 +9,11 @@
 //
 // This check resolves the computed colours itself: it walks every text node,
 // composites the ancestor background chain from the root down, and compares
-// against WCAG 2.1 AA. Decorative text is skipped on the page's own declaration
-// (aria-hidden="true" or role="img" on the element or an ancestor) — WCAG 1.4.3
-// exempts text that is pure decoration, and the art layer here is deliberately
-// illegible.
+// against WCAG 2.1 AA. Decorative text is skipped only on an explicit
+// declaration — role="img", or data-contrast-exempt="true" written by hand —
+// because WCAG 1.4.3 exempts text that is pure decoration and aria-hidden is
+// not that test. The art layer here is deliberately illegible, so it carries
+// the marker; everything else is measured.
 //
 // Gradients cannot be composited exactly. When one is met the nearest opaque
 // ancestor is used as the base and the result is marked approximate; it is still
@@ -41,6 +42,40 @@ const MIME = {
 if (!existsSync(join(DIST, 'index.html'))) {
   console.error('dist/index.html not found - run `npm run build` first.');
   process.exit(1);
+}
+
+// --- freshness phase: refuse to grade a stale build --------------------------
+// This check reads dist/, not src/. Run standalone against an out-of-date dist
+// and it grades the previous build and prints a confident "passed" — verified:
+// planting failing text in src/index.html and running `npm run check:contrast`
+// alone still reported "0 below threshold", because the probe was never built.
+// A gate that silently certifies the wrong artifact is worse than no gate, so
+// compare the newest build output against the newest input and stop if the
+// inputs are newer.
+const newestMtime = (dir) => {
+  let newest = 0;
+  const walk = (d) => {
+    for (const entry of readdirSync(d, { withFileTypes: true })) {
+      const p = join(d, entry.name);
+      if (entry.isDirectory()) walk(p);
+      else newest = Math.max(newest, statSync(p).mtimeMs);
+    }
+  };
+  walk(dir);
+  return newest;
+};
+{
+  const builtAt = newestMtime(DIST);
+  const inputs = [newestMtime(join(ROOT, 'src')), statSync(join(ROOT, 'index.html')).mtimeMs,
+                  statSync(join(ROOT, 'vite.config.js')).mtimeMs];
+  const changedAt = Math.max(...inputs);
+  if (changedAt > builtAt) {
+    const behind = Math.round((changedAt - builtAt) / 1000);
+    console.error(`dist/ is stale (source is ${behind}s newer than the build).`);
+    console.error('This check reads dist/. Run `npm run build` first, or use `npm run check`,');
+    console.error('which builds before it checks. Refusing to certify an artifact that is not the source.');
+    process.exit(1);
+  }
 }
 
 // --- static phase: every var(--token) without a fallback must be defined -----
@@ -134,10 +169,17 @@ for (const vp of VIEWPORTS) {
       const la = lum(a), lb = lum(b);
       return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
     };
+    // WCAG 1.4.3 exempts text that is "pure decoration" or "part of a picture".
+    // aria-hidden is NOT that test: it means "hidden from assistive technology",
+    // and an author can put readable content inside it (this page does — see
+    // .portrait-year). Exempting on aria-hidden alone made the gate blind to
+    // real text on the strength of an unrelated attribute. So the two accepted
+    // declarations are: role="img" (the subtree is a picture) and an explicit
+    // data-contrast-exempt="true" the author has to write on purpose.
     const decorative = (el) => {
       let cur = el;
       while (cur && cur !== document.documentElement) {
-        if (cur.getAttribute && (cur.getAttribute('aria-hidden') === 'true' || cur.getAttribute('role') === 'img')) return true;
+        if (cur.getAttribute && (cur.getAttribute('data-contrast-exempt') === 'true' || cur.getAttribute('role') === 'img')) return true;
         cur = cur.parentElement;
       }
       return false;
@@ -288,7 +330,7 @@ await browser.close();
 server.close();
 
 console.log(`text nodes examined      : ${examined}`);
-console.log(`decorative (aria-hidden) : ${skippedDecorative} (exempt, WCAG 1.4.3)`);
+console.log(`decorative (declared)    : ${skippedDecorative} (exempt, WCAG 1.4.3)`);
 console.log(`approximate (gradient)   : ${approximate}`);
 console.log(`below threshold          : ${findings.length}`);
 
